@@ -10,7 +10,7 @@
 
   <name>route-planning</name>
   <!-- change it to the project's website -->
-  <url>http://www.example.com</url>
+  <url>https://github.com/coffeeisoxygen/route-planning</url>
 
   <properties>
     <java.version>17</java.version>
