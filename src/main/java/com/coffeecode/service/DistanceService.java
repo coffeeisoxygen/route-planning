@@ -5,23 +5,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.coffeecode.model.Locations;
+import com.coffeecode.util.distance.GeoToolsCalculator;
 import com.coffeecode.util.distance.DistanceCalculator;
-import com.coffeecode.util.distance.DistanceCalculatorFactory;
-import com.coffeecode.util.distance.DistanceCalulatorName;
 
 @Service
 public class DistanceService {
-
     private static final Logger logger = LoggerFactory.getLogger(DistanceService.class);
-    private DistanceCalculator calculator;
+    private final DistanceCalculator calculator;
 
     public DistanceService() {
-        this.calculator = DistanceCalculatorFactory.getDistanceCalculator(DistanceCalulatorName.GEOTOOLS);
-    }
-
-    public void setCalculationStrategy(DistanceCalulatorName strategy) {
-        this.calculator = DistanceCalculatorFactory.getDistanceCalculator(strategy);
-        logger.info("Distance calculation strategy changed to: {}", strategy);
+        this.calculator = new GeoToolsCalculator();
     }
 
     public double calculateDistance(Locations loc1, Locations loc2) {
