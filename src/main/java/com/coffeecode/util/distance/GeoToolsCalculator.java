@@ -7,20 +7,19 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 public class GeoToolsCalculator implements DistanceCalculator {
 
-    private static final CoordinateReferenceSystem CRS_WGS84;
+    private final CoordinateReferenceSystem crsWGS84;
 
-    static {
+    public GeoToolsCalculator() {
         try {
-            System.setProperty("org.geotools.referencing.forceXY", "true");
-            CRS_WGS84 = CRS.decode("EPSG:4326", true);
+            this.crsWGS84 = CRS.decode("EPSG:4326", true);
         } catch (FactoryException e) {
-            throw new GeoToolsException("Failed to initialize CRS. Make sure GeoTools dependencies are properly configured", e);
+            throw new GeoToolsException("Failed to initialize CRS", e);
         }
     }
 
     @Override
     public double calculate(double lat1, double lon1, double lat2, double lon2) {
-        GeodeticCalculator calc = new GeodeticCalculator(CRS_WGS84);
+        GeodeticCalculator calc = new GeodeticCalculator(crsWGS84);
         calc.setStartingGeographicPoint(lon1, lat1);
         calc.setDestinationGeographicPoint(lon2, lat2);
         double distance = calc.getOrthodromicDistance() / 1000.0;

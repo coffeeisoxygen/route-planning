@@ -1,9 +1,9 @@
 package com.coffeecode.util.distance;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mockStatic;
 import org.geotools.referencing.CRS;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +19,11 @@ class GeoToolsCalculatorTest {
     @BeforeEach
     void setUp() {
         calculator = new GeoToolsCalculator();
+    }
+
+    @BeforeAll
+    static void initClass() {
+        System.setProperty("org.geotools.referencing.forceXY", "true");
     }
 
     @Test
@@ -64,7 +69,9 @@ class GeoToolsCalculatorTest {
             mockedCRS.when(() -> CRS.decode("EPSG:4326", true))
                     .thenThrow(new FactoryException("CRS initialization failed"));
 
-            assertThrows(GeoToolsException.class, () -> new GeoToolsCalculator());
+            GeoToolsException exception = assertThrows(GeoToolsException.class,
+                    () -> new GeoToolsCalculator());
+            assertTrue(exception.getMessage().contains("Failed to initialize CRS"));
         }
     }
 
