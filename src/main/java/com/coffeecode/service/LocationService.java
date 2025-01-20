@@ -52,4 +52,22 @@ public class LocationService {
     public boolean locationExists(UUID id) {
         return locationRepository.exists(id);
     }
+
+    public Locations updateLocation(UUID id, String name, double latitude, double longitude) {
+        logger.info("Updating location with ID: {}", id);
+        if (!locationRepository.exists(id)) {
+            throw new IllegalArgumentException("Location not found with ID: " + id);
+        }
+        Locations updatedLocation = new Locations(id, name, latitude, longitude);
+        return locationRepository.save(updatedLocation);
+    }
+
+    public double calculateDistance(UUID id1, UUID id2) {
+        logger.info("Calculating distance between locations: {} and {}", id1, id2);
+        Locations loc1 = locationRepository.findById(id1)
+                .orElseThrow(() -> new IllegalArgumentException("Location not found: " + id1));
+        Locations loc2 = locationRepository.findById(id2)
+                .orElseThrow(() -> new IllegalArgumentException("Location not found: " + id2));
+        return loc1.distanceTo(loc2);
+    }
 }

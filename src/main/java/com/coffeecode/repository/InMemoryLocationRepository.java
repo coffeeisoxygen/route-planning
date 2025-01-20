@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import com.coffeecode.model.Locations;
 
 @Repository
+@Primary
 public class InMemoryLocationRepository implements LocationRepository {
 
     private final Map<UUID, Locations> locations = new HashMap<>();
