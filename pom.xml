@@ -37,7 +37,11 @@
       <artifactId>gt-referencing</artifactId>
       <version>27.2</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-epsg-hsql</artifactId>
+      <version>27.2</version>
+    </dependency>
 
     <!-- logging features- -->
 

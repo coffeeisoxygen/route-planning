@@ -7,18 +7,10 @@ public class DistanceCalculatorFactory {
     }
 
     public static DistanceCalculator getDistanceCalculator(DistanceCalulatorName name) {
-        switch (name) {
-            case HAVERSINE -> {
-                return new HaversineCalculator();
-            }
-            case VINCENTY -> {
-                return new VincentyCalculator();
-            }
-            case EQUIRECTANGULAR -> {
-                return new EquirectangularCalculator();
-            }
-            default ->
-                throw new IllegalArgumentException("Unknown distance calculator: " + name);
+        if (name == DistanceCalulatorName.GEOTOOLS) {
+            return new GeoToolsCalculator();
+        } else {
+            throw new IllegalArgumentException("Unknown distance calculator: " + name);
         }
     }
 

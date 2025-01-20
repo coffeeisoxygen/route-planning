@@ -16,7 +16,7 @@ public class DistanceService {
     private DistanceCalculator calculator;
 
     public DistanceService() {
-        this.calculator = DistanceCalculatorFactory.getDistanceCalculator(DistanceCalulatorName.HAVERSINE);
+        this.calculator = DistanceCalculatorFactory.getDistanceCalculator(DistanceCalulatorName.GEOTOOLS);
     }
 
     public void setCalculationStrategy(DistanceCalulatorName strategy) {

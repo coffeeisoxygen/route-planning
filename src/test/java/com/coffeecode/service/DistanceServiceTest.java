@@ -37,18 +37,36 @@ class DistanceServiceTest {
     }
 
     @Test
+    void testCalculateDistanceBandungJakarta() {
+        // Arrange
+        // Jakarta coordinates
+        Locations jakarta = new Locations("Jakarta", -6.200000, 106.816666);
+        // Bandung coordinates  
+        Locations bandung = new Locations("Bandung", -6.914744, 107.609810);
+        
+        when(mockCalculator.calculate(-6.200000, 106.816666, -6.914744, 107.609810)).thenReturn(118.3);
+
+        // Act
+        double distance = distanceService.calculateDistance(jakarta, bandung);
+
+        // Assert
+        assertEquals(118.3, distance);
+        verify(mockCalculator).calculate(-6.200000, 106.816666, -6.914744, 107.609810);
+    }
+
+    @Test
     void testCalculateDistance() {
         // Arrange
-        Locations loc1 = new Locations("Location1", 10.0, 20.0);
-        Locations loc2 = new Locations("Location2", 30.0, 40.0);
-        when(mockCalculator.calculate(10.0, 20.0, 30.0, 40.0)).thenReturn(100.0);
+        Locations loc1 = new Locations("Location1",  -6.200000, 106.816666);
+        Locations loc2 = new Locations("Location2", -6.914744, 107.609810);
+        when(mockCalculator.calculate(-6.200000, 106.816666, -6.914744, 107.609810)).thenReturn(100.0);
 
         // Act
         double distance = distanceService.calculateDistance(loc1, loc2);
 
         // Assert
         assertEquals(100.0, distance);
-        verify(mockCalculator).calculate(10.0, 20.0, 30.0, 40.0);
+        verify(mockCalculator).calculate(-6.200000, 106.816666, -6.914744, 107.609810);
     }
 
 }
