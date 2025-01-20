@@ -8,7 +8,7 @@ public record Locations(UUID id, String name, double latitude, double longitude)
         this(UUID.randomUUID(), name, latitude, longitude);
     }
 
-    public Locations    {
+    public Locations {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Name cannot be null or empty");
         }
@@ -20,19 +20,32 @@ public record Locations(UUID id, String name, double latitude, double longitude)
         }
     }
 
+    private static double deg2rad(double deg) {
+        return deg * (Math.PI / 180.0);
+    }
+
+    private static double rad2deg(double rad) {
+        return rad * (180.0 / Math.PI);
+    }
+
     public double distanceTo(Locations other) {
-        final int R = 6371; // Earth's radius in km
-        double lat1 = Math.toRadians(this.latitude);
-        double lat2 = Math.toRadians(other.latitude);
-        double dLat = Math.toRadians(other.latitude - this.latitude);
-        double dLon = Math.toRadians(other.longitude - this.longitude);
+        if (other == null) {
+            throw new IllegalArgumentException("Other location cannot be null");
+        }
 
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-                + Math.cos(lat1) * Math.cos(lat2)
-                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double theta = this.longitude - other.longitude;
+        double dist = Math.sin(deg2rad(this.latitude)) * Math.sin(deg2rad(other.latitude))
+                + Math.cos(deg2rad(this.latitude)) * Math.cos(deg2rad(other.latitude))
+                * Math.cos(deg2rad(theta));
 
-        return R * c;
+        dist = Math.acos(Math.min(dist, 1.0)); // Prevent domain error
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515 * 1.609344; // Convert to kilometers
+        if (Double.isNaN(dist)) {
+            dist = 0.0;
+        }
+
+        return dist;
     }
 
     @Override
