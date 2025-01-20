@@ -1,0 +1,118 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            106.90775580966772,
+            -6.901892689058542
+          ],
+          "type": "Point"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            106.95701634983249,
+            -6.928650487488326
+          ],
+          "type": "Point"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            106.91209321572109,
+            -6.9378769627436725
+          ],
+          "type": "Point"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            106.9619733853196,
+            -6.89727912248577
+          ],
+          "type": "Point"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            106.94121579921415,
+            -6.9550992326571475
+          ],
+          "type": "Point"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            106.8752252642783,
+            -6.91511799724411
+          ],
+          "type": "Point"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            106.88173137335622,
+            -6.942797675638474
+          ],
+          "type": "Point"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            106.93780783731575,
+            -6.912657502803043
+          ],
+          "type": "Point"
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "titik1"
+        },
+        "geometry": {
+          "coordinates": [
+            106.99109596881272,
+            -6.912042377190986
+          ],
+          "type": "Point"
+        },
+        "id": 8
+      },
+      {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "coordinates": [
+            106.98428004501585,
+            -6.943105218486096
+          ],
+          "type": "Point"
+        }
+      }
+    ]
+  }
