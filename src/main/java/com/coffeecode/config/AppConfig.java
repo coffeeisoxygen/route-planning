@@ -11,7 +11,11 @@ import com.coffeecode.util.distance.DistanceCalculator;
 import com.coffeecode.util.distance.GeoToolsCalculator;
 
 @Configuration
-@ComponentScan(basePackages = "com.coffeecode")
+@ComponentScan(basePackages = {
+    "com.coffeecode.service",
+    "com.coffeecode.repository",
+    "com.coffeecode.gui.controllers"
+})
 public class AppConfig {
 
     @Bean
@@ -25,8 +29,8 @@ public class AppConfig {
     }
 
     @Bean
-    public LocationService locationService(LocationRepository locationRepository, 
-                                        DistanceService distanceService) {
+    public LocationService locationService(LocationRepository locationRepository,
+            DistanceService distanceService) {
         return new LocationService(locationRepository, distanceService);
     }
 }

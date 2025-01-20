@@ -48,6 +48,9 @@ public class LocationService {
 
     public void deleteLocation(UUID id) {
         logger.info("Deleting location with ID: {}", id);
+        if (!locationRepository.exists(id)) {
+            throw new IllegalArgumentException("Location not found with ID: " + id);
+        }
         locationRepository.delete(id);
     }
 
