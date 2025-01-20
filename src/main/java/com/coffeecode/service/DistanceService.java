@@ -5,20 +5,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.coffeecode.model.Locations;
-import com.coffeecode.util.distance.GeoToolsCalculator;
 import com.coffeecode.util.distance.DistanceCalculator;
 
 @Service
 public class DistanceService {
-    private static final Logger logger = LoggerFactory.getLogger(DistanceService.class);
     private final DistanceCalculator calculator;
+    private static final Logger logger = LoggerFactory.getLogger(DistanceService.class);
 
-    public DistanceService() {
-        this.calculator = new GeoToolsCalculator();
+    public DistanceService(DistanceCalculator calculator) {
+        this.calculator = calculator;
     }
 
     public double calculateDistance(Locations loc1, Locations loc2) {
-        if (loc1 == null || loc2 == null) {
+        if (loc1 ==  null || loc2 == null) {
             throw new IllegalArgumentException("Locations cannot be null");
         }
 
