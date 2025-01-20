@@ -17,10 +17,12 @@ public class LocationService {
 
     private static final Logger logger = LoggerFactory.getLogger(LocationService.class);
     private final LocationRepository locationRepository;
+    private final DistanceService distanceService;
 
     @Autowired
-    public LocationService(LocationRepository locationRepository) {
+    public LocationService(LocationRepository locationRepository, DistanceService distanceService) {
         this.locationRepository = locationRepository;
+        this.distanceService = distanceService;
     }
 
     public Locations addLocation(String name, double latitude, double longitude) {
@@ -68,6 +70,6 @@ public class LocationService {
                 .orElseThrow(() -> new IllegalArgumentException("Location not found: " + id1));
         Locations loc2 = locationRepository.findById(id2)
                 .orElseThrow(() -> new IllegalArgumentException("Location not found: " + id2));
-        return loc1.distanceTo(loc2);
+        return distanceService.calculateDistance(loc1, loc2);
     }
 }
