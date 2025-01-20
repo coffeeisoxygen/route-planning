@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 class VincentyCalculatorTest {
+
     private final VincentyCalculator calculator = new VincentyCalculator();
 
     @Test
@@ -18,3 +19,4 @@ class VincentyCalculatorTest {
         assertEquals(118.29, distance, 0.1);
     }
 }
+
