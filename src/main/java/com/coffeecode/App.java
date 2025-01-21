@@ -28,19 +28,21 @@ public class App {
                 MainFrame mainFrame = context.getBean(MainFrame.class);
                 mainFrame.setVisible(true);
 
-                // Add shutdown hook to properly close context
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    if (context != null) {
-                        context.close();
-                    }
-                }));
             } catch (BeansException | IllegalStateException e) {
-                logger.error("An error occurred while initializing the application context", e);
+                logger.error("Application context initialization failed", e);
                 if (context != null) {
                     context.close();
                 }
+                System.exit(1);
             }
         });
+
+        // Add shutdown hook to properly close context
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (context != null && context.isActive()) {
+                context.close();
+            }
+        }));
     }
 
     // Provide access to context for dialogs

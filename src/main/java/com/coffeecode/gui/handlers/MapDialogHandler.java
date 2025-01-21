@@ -3,6 +3,7 @@ package com.coffeecode.gui.handlers;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
+import java.util.Set;
 
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
@@ -19,20 +20,16 @@ import org.springframework.stereotype.Component;
 
 import com.coffeecode.gui.controllers.LocationController;
 import com.coffeecode.gui.models.MapDialogModel;
-import com.coffeecode.gui.models.MapDialogModel.SaveStatus;
-import com.coffeecode.gui.models.MapDialogModel.TempLocation;
 
 @Component
 public class MapDialogHandler {
 
     private final JXMapViewer mapViewer;
     private final LocationController controller;
-    private final MapDialogModel model;
 
     @Autowired
-    public MapDialogHandler(LocationController controller, MapDialogModel model) {
+    public MapDialogHandler(LocationController controller) {
         this.controller = controller;
-        this.model = model;
         this.mapViewer = new JXMapViewer();
         initializeMap();
     }
@@ -53,35 +50,34 @@ public class MapDialogHandler {
             default ->
                 new OSMTileFactoryInfo();
         };
-        mapViewer.setTileFactory(new DefaultTileFactory(info));
+        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+
+        // Store current view state
+        GeoPosition currentPosition = mapViewer.getCenterPosition();
+        int currentZoom = mapViewer.getZoom();
+
+        mapViewer.setTileFactory(tileFactory);
+
+        // Restore view state
+        mapViewer.setAddressLocation(currentPosition);
+        mapViewer.setZoom(currentZoom);
     }
 
-    public void addLocation(String name, GeoPosition position) {
-        TempLocation temp = new TempLocation(name, position, SaveStatus.UNSAVED);
-        model.getTempLocations().add(temp);
-        model.getListModel().addElement(temp);
-        updateWaypoints();
+    public void addLocationToMap(String name, GeoPosition position) {
+        DefaultWaypoint waypoint = new DefaultWaypoint(position) {
+            @Override
+            public String toString() {
+                return name;
+            }
+        };
+        updateWaypoint(waypoint);
     }
 
-    public void updateWaypoints() {
-        model.getWaypoints().clear();
-
-        // Re-add all temporary locations as waypoints
-        for (TempLocation loc : model.getTempLocations()) {
-            DefaultWaypoint waypoint = new DefaultWaypoint(loc.position()) {
-                @Override
-                public String toString() {
-                    return loc.name();
-                }
-            };
-            model.getWaypoints().add(waypoint);
-        }
-
-        // Update the painter
+    public void updateWaypoint(Waypoint waypoint) {
         WaypointPainter<Waypoint> painter = new WaypointPainter<>();
-        painter.setWaypoints(model.getWaypoints());
+        Set<Waypoint> waypoints = Set.of(waypoint);
+        painter.setWaypoints(waypoints);
         painter.setRenderer(createWaypointRenderer());
-
         mapViewer.setOverlayPainter(painter);
     }
 
@@ -90,11 +86,8 @@ public class MapDialogHandler {
             Point2D point = map.getTileFactory().geoToPixel(
                     wp.getPosition(), map.getZoom());
 
-            // Draw point
             g.setColor(Color.RED);
             g.fillOval((int) point.getX() - 5, (int) point.getY() - 5, 10, 10);
-
-            // Draw label
             g.setColor(Color.BLACK);
             g.drawString(wp.toString(), (int) point.getX() + 5, (int) point.getY());
         };
@@ -112,20 +105,13 @@ public class MapDialogHandler {
         mapViewer.setZoom(in ? zoom - 1 : zoom + 1);
     }
 
-    public void saveLocations() {
-        for (TempLocation temp : model.getTempLocations()) {
-            controller
-                    .addLocation(temp.name(), temp.position()
-                            .getLatitude(), temp.position().getLongitude());
-        }
-        model.getTempLocations().clear();
-        model.getListModel().clear();
-        model.getWaypoints().clear();
-        mapViewer.setOverlayPainter(null);
+    public void saveLocation(String name, GeoPosition position) {
+        controller.addLocation(name,
+                position.getLatitude(),
+                position.getLongitude());
     }
 
     public JXMapViewer getMapViewer() {
         return mapViewer;
     }
-
 }

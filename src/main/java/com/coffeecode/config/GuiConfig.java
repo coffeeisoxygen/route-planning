@@ -22,6 +22,11 @@ import com.coffeecode.service.LocationService;
 public class GuiConfig {
 
     @Bean
+    public MapDialogModel mapDialogModel() {
+        return new MapDialogModel();
+    }
+
+    @Bean
     public LocationTableModel locationTableModel() {
         return new LocationTableModel();
     }
@@ -40,18 +45,22 @@ public class GuiConfig {
     }
 
     @Bean
-    public JXMapViewer mapViewer() {
+    public JXMapViewer mapViewer(MapDialogModel model) {
         JXMapViewer viewer = new JXMapViewer();
         TileFactoryInfo info = new OSMTileFactoryInfo();
         viewer.setTileFactory(new DefaultTileFactory(info));
-        viewer.setAddressLocation(MapDialogModel.DEFAULT_LOCATIONS.get("Jakarta"));
-        viewer.setZoom(7);
+        viewer.setAddressLocation(model.getCurrentPosition());
+        viewer.setZoom(model.getCurrentZoom());
         return viewer;
     }
 
     @Bean
-    public MapDialog mapDialog(MapDialogModel model, MapDialogHandler handler,
-            LocationController controller) {
-        return new MapDialog(model, handler, controller);
+    public MapDialogHandler mapDialogHandler(LocationController controller) {
+        return new MapDialogHandler(controller);
+    }
+
+    @Bean
+    public MapDialog mapDialog(MapDialogHandler handler, LocationController controller) {
+        return new MapDialog(handler, controller);
     }
 }

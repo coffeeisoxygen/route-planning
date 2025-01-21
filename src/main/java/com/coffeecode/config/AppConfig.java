@@ -13,8 +13,7 @@ import com.coffeecode.util.distance.GeoToolsCalculator;
 @Configuration
 @ComponentScan(basePackages = {
     "com.coffeecode.service",
-    "com.coffeecode.repository",
-    "com.coffeecode.gui.controllers"
+    "com.coffeecode.repository"
 })
 public class AppConfig {
 

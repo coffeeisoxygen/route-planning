@@ -1,79 +1,62 @@
 package com.coffeecode.gui.models;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import javax.swing.DefaultListModel;
 
 import org.jxmapviewer.viewer.GeoPosition;
-import org.jxmapviewer.viewer.Waypoint;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MapDialogModel {
 
-    private final DefaultListModel<TempLocation> listModel = new DefaultListModel<>();
-    private final List<TempLocation> tempLocations = new ArrayList<>();
-    private final Set<Waypoint> waypoints = new HashSet<>();
-    private GeoPosition selectedPosition;
+    // Default map settings
+    private static final int DEFAULT_ZOOM = 7;
 
+    // Default locations for quick navigation
     public static final Map<String, GeoPosition> DEFAULT_LOCATIONS = Map.of(
             "Sukabumi", new GeoPosition(-6.91, 106.92),
             "Jakarta", new GeoPosition(-6.20, 106.81),
             "Bandung", new GeoPosition(-6.91, 107.60)
     );
 
-    public static record TempLocation(String name, GeoPosition position, SaveStatus status) {
-        public TempLocation {
-            if (name == null || name.trim().isEmpty()) {
-                throw new IllegalArgumentException("Location name cannot be empty");
-            }
-            if (position == null) {
-                throw new IllegalArgumentException("Position cannot be null");
-            }
-            // Validate coordinates
-            double lat = position.getLatitude();
-            double lon = position.getLongitude();
-            if (lat < -90 || lat > 90) {
-                throw new IllegalArgumentException("Invalid latitude");
-            }
-            if (lon < -180 || lon > 180) {
-                throw new IllegalArgumentException("Invalid longitude");
-            }
-        }
-        
-        @Override
-        public String toString() {
-            return String.format("%s (%.4f, %.4f) [%s]",
-                    name, position.getLatitude(), position.getLongitude(), status);
-        }
+    // Map state
+    private GeoPosition currentPosition;
+    private int currentZoom;
+    private MapType currentMapType;
+
+    public enum MapType {
+        OPENSTREETMAP,
+        VIRTUAL_EARTH
     }
 
-    public enum SaveStatus {
-        UNSAVED, SAVED, FAILED
+    public MapDialogModel() {
+        // Initialize with default values
+        this.currentPosition = DEFAULT_LOCATIONS.get("Jakarta");
+        this.currentZoom = DEFAULT_ZOOM;
+        this.currentMapType = MapType.OPENSTREETMAP;
     }
 
-    // Getters
-    public DefaultListModel<TempLocation> getListModel() {
-        return listModel;
+    // Getters and setters
+    public GeoPosition getCurrentPosition() {
+        return currentPosition;
     }
 
-    public List<TempLocation> getTempLocations() {
-        return tempLocations;
+    public void setCurrentPosition(GeoPosition position) {
+        this.currentPosition = position;
     }
 
-    public Set<Waypoint> getWaypoints() {
-        return waypoints;
+    public int getCurrentZoom() {
+        return currentZoom;
     }
 
-    public GeoPosition getSelectedPosition() {
-        return selectedPosition;
+    public void setCurrentZoom(int zoom) {
+        this.currentZoom = zoom;
     }
 
-    public void setSelectedPosition(GeoPosition pos) {
-        this.selectedPosition = pos;
+    public MapType getCurrentMapType() {
+        return currentMapType;
+    }
+
+    public void setCurrentMapType(MapType mapType) {
+        this.currentMapType = mapType;
     }
 }
