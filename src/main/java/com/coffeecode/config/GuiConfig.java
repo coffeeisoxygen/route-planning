@@ -85,23 +85,27 @@ public class GuiConfig {
         Graph graph = new SingleGraph("Locations");
         graph.setAttribute("ui.quality");
         graph.setAttribute("ui.antialias");
+        // Add this to ensure proper rendering
+        graph.setAttribute("ui.stylesheet", GraphPanelModel.STYLESHEET);
         return graph;
     }
 
     @Bean
     public SpringBox springLayout() {
         SpringBox layout = new SpringBox(false);
-        layout.setForce(0.5);
-        layout.setQuality(1.0);
-        layout.setStabilizationLimit(0.0001);
-        layout.setGravityFactor(0.8);
+        // Optimize layout parameters
+        layout.setForce(0.8);         // Increase force for better movement
+        layout.setQuality(0.9);       // High quality
+        layout.setStabilizationLimit(0.001);  // Lower for more movement
+        layout.setGravityFactor(0.9); // Stronger gravity
         return layout;
     }
 
     @Bean
     public ViewerPipe viewerPipe(Graph locationGraph) {
         // Create viewer first
-        Viewer viewer = new SwingViewer(locationGraph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
+        SwingViewer viewer = new SwingViewer(locationGraph,
+                Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
         viewer.enableAutoLayout();
 
         // Then create and return the pipe

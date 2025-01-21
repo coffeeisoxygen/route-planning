@@ -31,21 +31,33 @@ public class GraphPanelHandler {
         logger.debug("Updating graph with {} locations", locations.size());
 
         SwingUtilities.invokeLater(() -> {
+            // Temporarily disable layout for batch updates
+            model.getGraph().setAttribute("layout.frozen");
+
             model.getGraph().clear();
 
-            // Add nodes first
-            locations.forEach(this::addNode);
+            // Add nodes with smooth positioning
+            locations.forEach(loc -> {
+                Node node = addNode(loc);
+                // Add initial position for smooth transition
+                double x = transformLongitude(loc.longitude());
+                double y = transformLatitude(loc.latitude());
+                node.setAttribute("xy", x, y);
+            });
 
-            // Then add edges
+            // Add edges
             for (int i = 0; i < locations.size(); i++) {
                 for (int j = i + 1; j < locations.size(); j++) {
                     addEdge(locations.get(i), locations.get(j));
                 }
             }
+
+            // Re-enable layout for animation
+            model.getGraph().removeAttribute("layout.frozen");
         });
     }
 
-    private void addNode(Locations loc) {
+    private Node addNode(Locations loc) {
         String nodeId = loc.id().toString();
         Node node = model.getGraph().addNode(nodeId);
 
@@ -55,6 +67,8 @@ public class GraphPanelHandler {
 
         node.setAttribute("xy", x, y);
         node.setAttribute("ui.label", loc.name());
+        
+        return node;
     }
 
     private void addEdge(Locations loc1, Locations loc2) {

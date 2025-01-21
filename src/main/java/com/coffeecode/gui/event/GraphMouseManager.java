@@ -18,7 +18,7 @@ public class GraphMouseManager extends DefaultMouseManager {
 
     private final Graph graph;
     private Node selectedNode;
-    private Point2D.Double lastPosition;
+    private Point2D.Double dragStart;
 
     public GraphMouseManager(Graph graph) {
         this.graph = graph;
@@ -35,30 +35,31 @@ public class GraphMouseManager extends DefaultMouseManager {
 
         selectedNode = findNearestNode(mousePosition.x, mousePosition.y);
         if (selectedNode != null) {
-            lastPosition = new Point2D.Double(event.getX(), event.getY());
+            dragStart = new Point2D.Double(event.getX(), event.getY());
             selectedNode.setAttribute("ui.class", "selected");
+            // Disable auto-layout when dragging
+            graph.setAttribute("layout.frozen");
             logger.debug("Selected node: {}", selectedNode.getId());
         }
     }
 
     @Override
     public void mouseDragged(MouseEvent event) {
-        if (selectedNode == null) {
-            return;
+        if (selectedNode != null && dragStart != null) {
+            View view = (View) event.getSource();
+            Point3 newPos = view.getCamera().transformPxToGu(event.getX(), event.getY());
+            selectedNode.setAttribute("xy", newPos.x, newPos.y);
         }
-
-        View view = (View) event.getSource();
-        Point3 newPos = view.getCamera().transformPxToGu(event.getX(), event.getY());
-        selectedNode.setAttribute("xy", newPos.x, newPos.y);
-        lastPosition = new Point2D.Double(event.getX(), event.getY());
     }
 
     @Override
     public void mouseReleased(MouseEvent event) {
         if (selectedNode != null) {
             selectedNode.removeAttribute("ui.class");
+            // Re-enable auto-layout
+            graph.removeAttribute("layout.frozen");
             selectedNode = null;
-            lastPosition = null;
+            dragStart = null;
         }
     }
 
