@@ -1,11 +1,12 @@
 package com.coffeecode.domain.model;
 
 import java.util.UUID;
+
 import com.coffeecode.domain.exception.InvalidLocationException;
 
 public record Locations(UUID id, String name, double latitude, double longitude) {
-
-    public Locations    {
+    
+    public Locations {
         validate(name, latitude, longitude);
     }
 
@@ -25,12 +26,8 @@ public record Locations(UUID id, String name, double latitude, double longitude)
         }
     }
 
-    /**
-     * Simple spherical distance calculation. For high-precision calculations,
-     * use infrastructure layer.
-     */
     public double distanceTo(double lat, double lon) {
-        double earthRadiusInKM = 6371; // Earth radius in kilometers
+        double earthRadiusInKM = 6371.01;
         double dLat = Math.toRadians(lat - this.latitude);
         double dLon = Math.toRadians(lon - this.longitude);
 
