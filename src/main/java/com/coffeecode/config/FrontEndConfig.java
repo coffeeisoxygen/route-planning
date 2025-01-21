@@ -19,9 +19,30 @@ import org.springframework.context.annotation.Configuration;
 public class FrontEndConfig {
 
     @Bean
-    public Graph routeGraph() {
+    public String graphStyleSheet() {
+        return """
+            graph {
+                padding: 50px;
+                fill-color: white;
+            }
+            node {
+                size: 30px;
+                fill-color: #4488FF;
+                text-size: 14px;
+            }
+            edge {
+                shape: line;
+                fill-color: #666666;
+                arrow-size: 8px;
+            }
+        """;
+    }
+
+    @Bean
+    public Graph routeGraph(String graphStyleSheet) {
         System.setProperty("org.graphstream.ui", "swing");
         Graph graph = new SingleGraph("RouteGraph");
+        graph.setAttribute("ui.stylesheet", graphStyleSheet);
         graph.setAttribute("ui.quality");
         graph.setAttribute("ui.antialias");
         return graph;

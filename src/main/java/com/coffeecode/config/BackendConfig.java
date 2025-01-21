@@ -12,7 +12,8 @@ import com.coffeecode.infrastructure.distance.GeoToolsRouteCalculator;
 @Configuration
 @ComponentScan(basePackages = {
     "com.coffeecode.application.service",
-    "com.coffeecode.infrastructure"
+    "com.coffeecode.infrastructure.persistance", // Add specific packages
+    "com.coffeecode.infrastructure.distance" // Add specific packages
 })
 public class BackendConfig {
 
