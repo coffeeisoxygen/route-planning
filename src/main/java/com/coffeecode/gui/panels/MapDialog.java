@@ -16,10 +16,15 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.JSplitPane;
+import javax.swing.table.DefaultTableModel;
 
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
@@ -46,6 +51,7 @@ public class MapDialog extends JDialog {
     private final DefaultListModel<TempLocation> listModel;
     private final transient List<TempLocation> tempLocations;
     private final transient Set<Waypoint> waypoints;
+    
 
     @Autowired
     public MapDialog(MapDialogModel model, MapDialogHandler handler, LocationController controller) {
@@ -67,23 +73,41 @@ public class MapDialog extends JDialog {
     }
 
     private void initComponents() {
-        // Create controls panel
+        // Create control panel
         JPanel controls = createControlPanel();
 
-        // Create location list panel
-        JScrollPane listPane = createLocationListPanel();
+        // Create table panel with proper model
+        JPanel tablePanel = new JPanel(new BorderLayout());
+        JTable locationTable = createLocationTable();
+        JScrollPane tableScrollPane = new JScrollPane(locationTable);
+        
+        // Add buttons panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton saveAllButton = new JButton("Save All");
+        JButton deleteAllButton = new JButton("Delete All");
+        
+        saveAllButton.addActionListener(e -> saveLocations());
+        deleteAllButton.addActionListener(e -> {
+            tempLocations.clear();
+            updateTableData();
+            refreshMap();
+        });
+        
+        buttonPanel.add(saveAllButton);
+        buttonPanel.add(deleteAllButton);
+        
+        tablePanel.add(tableScrollPane, BorderLayout.CENTER);
+        tablePanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Initialize map
-        TileFactoryInfo info = new OSMTileFactoryInfo();
-        mapViewer.setTileFactory(new DefaultTileFactory(info));
-        mapViewer.setAddressLocation(MapDialogModel.DEFAULT_LOCATIONS.get("Jakarta"));
-        mapViewer.setZoom(7);
+        // Create split pane
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                mapViewer, tablePanel);
+        splitPane.setResizeWeight(0.7); // 70% for map, 30% for table
 
         // Layout
         setLayout(new BorderLayout());
         add(controls, BorderLayout.NORTH);
-        add(mapViewer, BorderLayout.CENTER);
-        add(listPane, BorderLayout.EAST);
+        add(splitPane, BorderLayout.CENTER);
     }
 
     private JPanel createControlPanel() {
@@ -113,26 +137,59 @@ public class MapDialog extends JDialog {
         return controls;
     }
 
-    private JScrollPane createLocationListPanel() {
-        JList<TempLocation> locationList = new JList<>(listModel);
-        JScrollPane scrollPane = new JScrollPane(locationList);
-        scrollPane.setPreferredSize(new Dimension(250, 0));
+    private JTable createLocationTable() {
+        String[] columnNames = {"Name", "Latitude", "Longitude", "Status"};
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int col) {
+                return col == 0; // Only name column is editable
+            }
+        };
+        
+        JTable table = new JTable(tableModel);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        // Add context menu
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem renameItem = new JMenuItem("Rename");
+        JMenuItem deleteItem = new JMenuItem("Delete");
+        
+        renameItem.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row >= 0) {
+                table.editCellAt(row, 0);
+                table.getEditorComponent().requestFocus();
+            }
+        });
+        
+        deleteItem.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row >= 0) {
+                tempLocations.remove(row);
+                updateTableData();
+                refreshMap();
+            }
+        });
+        
+        popupMenu.add(renameItem);
+        popupMenu.add(deleteItem);
+        table.setComponentPopupMenu(popupMenu);
+        
+        return table;
+    }
 
-        JPanel buttonPanel = new JPanel();
-        JButton saveButton = new JButton("Save All");
-        JButton clearButton = new JButton("Clear");
-
-        saveButton.addActionListener(e -> saveLocations());
-        clearButton.addActionListener(e -> clearLocations());
-
-        buttonPanel.add(saveButton);
-        buttonPanel.add(clearButton);
-
-        JPanel wrapper = new JPanel(new BorderLayout());
-        wrapper.add(scrollPane, BorderLayout.CENTER);
-        wrapper.add(buttonPanel, BorderLayout.SOUTH);
-
-        return scrollPane;
+    private void updateTableData() {
+        DefaultTableModel model = (DefaultTableModel) locationTable.getModel();
+        model.setRowCount(0); // Clear existing rows
+        
+        for (TempLocation loc : tempLocations) {
+            model.addRow(new Object[]{
+                loc.name(),
+                loc.position().getLatitude(),
+                loc.position().getLongitude(),
+                loc.status()
+            });
+        }
     }
 
     private void setupListeners() {
