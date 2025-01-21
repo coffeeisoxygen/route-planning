@@ -1,5 +1,7 @@
 package com.coffeecode.gui;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 
@@ -29,13 +31,12 @@ public class MainFrame extends JFrame {
 
         // Initialize components
         mapView = new MapView(controller);
-        graphView = new GraphView(controller);
+        graphView = new GraphView();
         statsPanel = new StatisticsPanel();
-        controlPanel = new RouteControlPanel(controller);
+        controlPanel = new RouteControlPanel();
 
         // Setup split panes
-        rightSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                graphView, statsPanel);
+        rightSplitPane = new JSplitPane();
         rightSplitPane.setResizeWeight(0.7);
 
         mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,

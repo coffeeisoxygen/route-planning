@@ -2,7 +2,6 @@ package com.coffeecode.config;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
-import org.graphstream.ui.view.Viewer;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.viewer.DefaultTileFactory;
@@ -37,8 +36,4 @@ public class GuiConfig {
         return mapViewer;
     }
 
-    @Bean
-    public Viewer graphViewer(Graph graph) {
-        return new Viewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-    }
 }

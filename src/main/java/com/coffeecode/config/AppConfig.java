@@ -4,11 +4,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
-import com.coffeecode.repository.LocationRepository;
-import com.coffeecode.service.DistanceService;
-import com.coffeecode.service.LocationService;
-import com.coffeecode.util.distance.DistanceCalculator;
-import com.coffeecode.util.distance.GeoToolsCalculator;
+import com.coffeecode.application.port.output.LocationPersistancePort;
+import com.coffeecode.application.services.DistanceService;
+import com.coffeecode.application.services.LocationService;
+import com.coffeecode.application.services.distance.DistanceCalculator;
+import com.coffeecode.application.services.distance.GeoToolsCalculator;
 
 @Configuration
 @ComponentScan(basePackages = {
@@ -29,7 +29,7 @@ public class AppConfig {
 
     @Bean
     public LocationService locationService(
-            LocationRepository locationRepository,
+            LocationPersistancePort locationRepository,
             DistanceService distanceService) {
         return new LocationService(locationRepository, distanceService);
     }

@@ -2,7 +2,7 @@ package com.coffeecode.gui.event;
 
 import java.util.List;
 
-import com.coffeecode.model.Locations;
+import com.coffeecode.domain.model.Locations;
 
 public interface LocationUpdateListener {
 
@@ -10,5 +10,5 @@ public interface LocationUpdateListener {
 
     void onLocationSelected(Locations location);
 
-    void onRouteCalculated(Locations start, Locations end, double distance);
+    void onPathCalculated(Locations start, Locations end, List<Locations> path);
 }
