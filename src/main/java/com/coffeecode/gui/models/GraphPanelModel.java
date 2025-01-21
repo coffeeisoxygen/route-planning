@@ -9,92 +9,47 @@ public class GraphPanelModel {
 
     private final Graph graph;
 
+    // Keep only the stylesheet constant at top
+    public static final String STYLESHEET = """
+        graph { padding: 50px; }
+        node {
+            size: 30px;
+            fill-color: #4488FF, #FF4444;
+            fill-mode: gradient-radial;
+            stroke-mode: plain;
+            stroke-color: #444444;
+            stroke-width: 1px;
+            text-size: 14px;
+            text-style: bold;
+            text-background-mode: rounded-box;
+            text-padding: 5px;
+            text-color: #000000;
+        }
+        node.selected {
+            size: 40px;
+            stroke-width: 3px;
+            stroke-color: #CC0000;
+        }
+        node:hover { stroke-width: 2px; }
+        edge {
+            shape: line;
+            fill-color: #666666;
+            arrow-size: 10px, 5px;
+            text-size: 12px;
+            text-background-mode: plain;
+            text-background-color: #FFFFFF;
+        }
+    """;
+
     @Autowired
     public GraphPanelModel(Graph graph) {
         this.graph = graph;
+        graph.setAttribute("ui.stylesheet", STYLESHEET);
+        graph.setAttribute("ui.antialias");
+        graph.setAttribute("ui.quality");
     }
 
     public Graph getGraph() {
         return graph;
-    }
-
-    // Default styling
-    public static final String DEFAULT_STYLE = """
-        node {
-            size: 15px;
-            fill-color: rgb(0,100,255), rgb(255,0,0);
-            fill-mode: gradient-radial;
-            stroke-mode: plain;
-            stroke-color: #555;
-            text-size: 14;
-            text-style: bold;
-            text-background-mode: rounded-box;
-            text-padding: 2px;
-        }
-        node.selected {
-            size: 20px;
-            fill-color: rgb(255,100,100), rgb(255,0,0);
-            stroke-width: 3px;
-        }
-        edge {
-            size: 2px;
-            fill-color: #999;
-            text-size: 12;
-            text-background-mode: rounded-box;
-            text-padding: 2px;
-        }
-    """;
-
-    // Layout settings
-    private static final double DEFAULT_FORCE = 0.5;
-    private static final double DEFAULT_QUALITY = 0.9;
-    private static final int DEFAULT_ZOOM = 1;
-
-    // State
-    private boolean autoLayoutEnabled = true;
-    private boolean animationEnabled = true;
-    private double zoomLevel = DEFAULT_ZOOM;
-    private double layoutForce = DEFAULT_FORCE;
-    private double layoutQuality = DEFAULT_QUALITY;
-
-    // Getters and setters
-    public boolean isAutoLayoutEnabled() {
-        return autoLayoutEnabled;
-    }
-
-    public void setAutoLayoutEnabled(boolean enabled) {
-        this.autoLayoutEnabled = enabled;
-    }
-
-    public boolean isAnimationEnabled() {
-        return animationEnabled;
-    }
-
-    public void setAnimationEnabled(boolean enabled) {
-        this.animationEnabled = enabled;
-    }
-
-    public double getZoomLevel() {
-        return zoomLevel;
-    }
-
-    public void setZoomLevel(double level) {
-        this.zoomLevel = level;
-    }
-
-    public double getLayoutForce() {
-        return layoutForce;
-    }
-
-    public void setLayoutForce(double force) {
-        this.layoutForce = force;
-    }
-
-    public double getLayoutQuality() {
-        return layoutQuality;
-    }
-
-    public void setLayoutQuality(double quality) {
-        this.layoutQuality = quality;
     }
 }

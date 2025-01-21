@@ -35,10 +35,11 @@ public class GraphPanel extends JPanel implements LocationTableModel.LocationTab
     private final GraphMouseManager mouseManager;
     private final SpringBox springLayout;
     private final SwingViewer viewer;
-    private boolean enablePhysics = true;
+    private JToggleButton layoutToggle;
 
     @Autowired
-    public GraphPanel(Graph graph, SpringBox springLayout,
+    public GraphPanel(Graph graph,
+            SpringBox springLayout,
             LocationTableModel tableModel,
             GraphPanelHandler handler,
             GraphMouseManager mouseManager) {
@@ -49,32 +50,30 @@ public class GraphPanel extends JPanel implements LocationTableModel.LocationTab
 
         setLayout(new BorderLayout());
 
-        // Initialize viewer
+        // Initialize viewer with proper threading model
         viewer = new SwingViewer(graph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
         viewer.enableAutoLayout(springLayout);
-        handler.setViewer(viewer);
 
-        initComponents();
+        // Setup view
+        View view = viewer.addDefaultView(false);
+        view.setMouseManager(mouseManager);
+
+        // Create and add components
+        add(createToolbar(), BorderLayout.NORTH);
+        add((JPanel) view, BorderLayout.CENTER);
+
+        // Setup handler and listeners
+        handler.setViewer(viewer);
         tableModel.addListener(this);
     }
 
-    private void initComponents() {
-        JPanel controlPanel = createControlPanel();
-        add(controlPanel, BorderLayout.NORTH);
+    private JPanel createToolbar() {
+        JPanel toolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        View view = viewer.addDefaultView(false);
-        view.setMouseManager(mouseManager);
-        add((JPanel) view, BorderLayout.CENTER);
-    }
-
-    private JPanel createControlPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-        // Physics toggle
-        JToggleButton physicsToggle = new JToggleButton("Physics", enablePhysics);
-        physicsToggle.addActionListener(e -> {
-            enablePhysics = physicsToggle.isSelected();
-            if (enablePhysics) {
+        // Layout toggle
+        layoutToggle = new JToggleButton("Auto Layout", true);
+        layoutToggle.addActionListener(e -> {
+            if (layoutToggle.isSelected()) {
                 viewer.enableAutoLayout(springLayout);
             } else {
                 viewer.disableAutoLayout();
@@ -90,13 +89,14 @@ public class GraphPanel extends JPanel implements LocationTableModel.LocationTab
         zoomOut.addActionListener(e -> handler.zoom(false));
         reset.addActionListener(e -> handler.resetView());
 
-        panel.add(physicsToggle);
-        panel.add(new JLabel("Zoom:"));
-        panel.add(zoomIn);
-        panel.add(zoomOut);
-        panel.add(reset);
+        // Add components
+        toolbar.add(layoutToggle);
+        toolbar.add(new JLabel("Zoom:"));
+        toolbar.add(zoomIn);
+        toolbar.add(zoomOut);
+        toolbar.add(reset);
 
-        return panel;
+        return toolbar;
     }
 
     @Override

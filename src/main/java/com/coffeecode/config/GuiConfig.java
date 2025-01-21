@@ -16,7 +16,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import com.coffeecode.gui.MainFrame;
-import com.coffeecode.gui.animation.GraphAnimation;
 import com.coffeecode.gui.controllers.LocationController;
 import com.coffeecode.gui.event.GraphMouseManager;
 import com.coffeecode.gui.handlers.GraphPanelHandler;
@@ -82,15 +81,6 @@ public class GuiConfig {
     }
 
     @Bean
-    public SpringBox springLayout() {
-        SpringBox layout = new SpringBox(false);
-        layout.setForce(0.3);  // Reduced force for smoother movement
-        layout.setQuality(0.9);
-        layout.setStabilizationLimit(0.001);
-        return layout;
-    }
-
-    @Bean
     public Graph locationGraph() {
         Graph graph = new SingleGraph("Locations");
         graph.setAttribute("ui.quality");
@@ -99,8 +89,13 @@ public class GuiConfig {
     }
 
     @Bean
-    public GraphAnimation graphAnimation(Graph locationGraph) {
-        return new GraphAnimation(locationGraph);
+    public SpringBox springLayout() {
+        SpringBox layout = new SpringBox(false);
+        layout.setForce(0.5);
+        layout.setQuality(1.0);
+        layout.setStabilizationLimit(0.0001);
+        layout.setGravityFactor(0.8);
+        return layout;
     }
 
     @Bean
@@ -108,23 +103,20 @@ public class GuiConfig {
         // Create viewer first
         Viewer viewer = new SwingViewer(locationGraph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
         viewer.enableAutoLayout();
-        
+
         // Then create and return the pipe
         return viewer.newViewerPipe();
     }
 
     @Bean
-    public GraphMouseManager graphMouseManager(Graph locationGraph,
-            ViewerPipe viewerPipe,
-            GraphAnimation graphAnimation) {
-        return new GraphMouseManager(locationGraph, viewerPipe, graphAnimation);
+    public GraphMouseManager graphMouseManager(Graph locationGraph) {
+        return new GraphMouseManager(locationGraph);
     }
 
     @Bean
     public GraphPanelHandler graphPanelHandler(GraphPanelModel model,
-            DistanceService distanceService,
-            GraphAnimation animation) {
-        return new GraphPanelHandler(model, distanceService, animation);
+            DistanceService distanceService) {
+        return new GraphPanelHandler(model, distanceService);
     }
 
     @Bean

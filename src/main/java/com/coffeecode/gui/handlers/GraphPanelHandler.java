@@ -9,7 +9,6 @@ import org.graphstream.ui.view.Viewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.coffeecode.gui.animation.GraphAnimation;
 import com.coffeecode.gui.models.GraphPanelModel;
 import com.coffeecode.model.Locations;
 import com.coffeecode.service.DistanceService;
@@ -17,37 +16,31 @@ import com.coffeecode.service.DistanceService;
 public class GraphPanelHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GraphPanelHandler.class);
+    private static final double ZOOM_FACTOR = 0.1;
 
     private final GraphPanelModel model;
     private final DistanceService distanceService;
-    private final GraphAnimation animation;
     private Viewer viewer;
 
-    public GraphPanelHandler(GraphPanelModel model,
-            DistanceService distanceService,
-            GraphAnimation animation) {
+    public GraphPanelHandler(GraphPanelModel model, DistanceService distanceService) {
         this.model = model;
         this.distanceService = distanceService;
-        this.animation = animation;
     }
 
     public void updateLocations(List<Locations> locations) {
         logger.debug("Updating graph with {} locations", locations.size());
 
-        if (viewer != null) {
-            viewer.disableAutoLayout();
-        }
-
-        animation.reset();
-
         SwingUtilities.invokeLater(() -> {
             model.getGraph().clear();
-            locations.forEach(this::addNode);
-            addEdges(locations);
 
-            if (viewer != null) {
-                viewer.enableAutoLayout();
-                animation.start();
+            // Add nodes first
+            locations.forEach(this::addNode);
+
+            // Then add edges
+            for (int i = 0; i < locations.size(); i++) {
+                for (int j = i + 1; j < locations.size(); j++) {
+                    addEdge(locations.get(i), locations.get(j));
+                }
             }
         });
     }
@@ -56,31 +49,31 @@ public class GraphPanelHandler {
         String nodeId = loc.id().toString();
         Node node = model.getGraph().addNode(nodeId);
 
-        // Scale coordinates
-        double x = (loc.longitude() + 180) / 360.0 * 2 - 1;
-        double y = (loc.latitude() + 90) / 180.0 * 2 - 1;
+        // Transform coordinates to graph space (-1 to 1 range)
+        double x = transformLongitude(loc.longitude());
+        double y = transformLatitude(loc.latitude());
 
         node.setAttribute("xy", x, y);
         node.setAttribute("ui.label", loc.name());
     }
 
     private void addEdge(Locations loc1, Locations loc2) {
-        String edgeId = loc1.id() + "-" + loc2.id();
+        String edgeId = String.format("%s-%s", loc1.id(), loc2.id());
         var edge = model.getGraph().addEdge(edgeId,
                 loc1.id().toString(),
                 loc2.id().toString(),
                 false);
 
         double distance = distanceService.calculateDistance(loc1, loc2);
-        edge.setAttribute("ui.label", String.format("%.2f km", distance));
+        edge.setAttribute("ui.label", String.format("%.1f km", distance));
     }
 
-    private void addEdges(List<Locations> locations) {
-        for (int i = 0; i < locations.size(); i++) {
-            for (int j = i + 1; j < locations.size(); j++) {
-                addEdge(locations.get(i), locations.get(j));
-            }
-        }
+    private double transformLongitude(double lon) {
+        return (lon + 180) / 360.0 * 2 - 1;
+    }
+
+    private double transformLatitude(double lat) {
+        return (lat + 90) / 180.0 * 2 - 1;
     }
 
     public void setViewer(Viewer viewer) {
@@ -90,25 +83,16 @@ public class GraphPanelHandler {
     public void zoom(boolean in) {
         if (viewer != null) {
             double viewPercent = viewer.getDefaultView().getCamera().getViewPercent();
-            viewer.getDefaultView().getCamera().setViewPercent(
-                    in ? viewPercent * 0.9 : viewPercent * 1.1);
+            double newPercent = in
+                    ? viewPercent * (1 - ZOOM_FACTOR)
+                    : viewPercent * (1 + ZOOM_FACTOR);
+            viewer.getDefaultView().getCamera().setViewPercent(newPercent);
         }
     }
 
     public void resetView() {
         if (viewer != null) {
             viewer.getDefaultView().getCamera().resetView();
-        }
-    }
-
-    public void toggleAutoLayout() {
-        model.setAutoLayoutEnabled(!model.isAutoLayoutEnabled());
-        if (viewer != null) {
-            if (model.isAutoLayoutEnabled()) {
-                viewer.enableAutoLayout();
-            } else {
-                viewer.disableAutoLayout();
-            }
         }
     }
 }
