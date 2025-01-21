@@ -20,6 +20,7 @@ import javax.swing.SwingUtilities;
 
 import org.springframework.context.ApplicationContext;
 
+import com.coffeecode.App;
 import com.coffeecode.gui.controllers.LocationController;
 import com.coffeecode.gui.controllers.LocationOperationException;
 import com.coffeecode.gui.models.LocationTableModel;
@@ -158,7 +159,7 @@ public class LocationTablePanel extends JPanel {
     }
 
     private void showMapDialog() {
-        MapDialog dialog = applicationContext.getBean(MapDialog.class);
+        MapDialog dialog = App.getContext().getBean(MapDialog.class);
         dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
         dialog.setVisible(true);
     }
