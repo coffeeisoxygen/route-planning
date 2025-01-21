@@ -27,6 +27,7 @@ public class MainFrame extends JFrame {
         this.tableModel = tableModel;
         this.applicationContext = applicationContext;
         initComponents();
+        setupFrame();
     }
 
     private void initComponents() {

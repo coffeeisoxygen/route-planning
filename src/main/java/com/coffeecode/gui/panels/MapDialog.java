@@ -3,10 +3,11 @@ package com.coffeecode.gui.panels;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.HeadlessException;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -51,10 +52,10 @@ public class MapDialog extends JDialog {
         this.model = model;
         this.handler = handler;
         this.controller = controller;
-        this.mapViewer = new JXMapViewer();
-        this.listModel = new DefaultListModel<>();
-        this.tempLocations = new ArrayList<>();
-        this.waypoints = new HashSet<>();
+        this.mapViewer = handler.getMapViewer();
+        this.listModel = model.getListModel();
+        this.tempLocations = model.getTempLocations();
+        this.waypoints = model.getWaypoints();
 
         setTitle("Select Location");
         setSize(800, 600);
@@ -88,16 +89,26 @@ public class MapDialog extends JDialog {
     private JPanel createControlPanel() {
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
+        // Existing components
         JComboBox<String> mapType = new JComboBox<>(new String[]{"OpenStreetMap", "VirtualEarth"});
         mapType.addActionListener(e -> handler.switchMapType(mapType.getSelectedIndex()));
 
         JComboBox<String> locations = new JComboBox<>(MapDialogModel.DEFAULT_LOCATIONS.keySet().toArray(String[]::new));
         locations.addActionListener(e -> handler.goToLocation((String) locations.getSelectedItem()));
 
+        // Add zoom controls
+        JButton zoomIn = new JButton("+");
+        JButton zoomOut = new JButton("-");
+        zoomIn.addActionListener(e -> handler.zoom(true));
+        zoomOut.addActionListener(e -> handler.zoom(false));
+
         controls.add(new JLabel("Map:"));
         controls.add(mapType);
         controls.add(new JLabel("Go to:"));
         controls.add(locations);
+        controls.add(new JLabel("Zoom:"));
+        controls.add(zoomIn);
+        controls.add(zoomOut);
 
         return controls;
     }
@@ -125,6 +136,7 @@ public class MapDialog extends JDialog {
     }
 
     private void setupListeners() {
+        // Existing mouse listener
         mapViewer.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -132,12 +144,33 @@ public class MapDialog extends JDialog {
                 addNewLocation();
             }
         });
+
+        // Add keyboard listener for zoom
+        mapViewer.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_PLUS || e.getKeyCode() == KeyEvent.VK_ADD) {
+                    handler.zoom(true);
+                } else if (e.getKeyCode() == KeyEvent.VK_MINUS || e.getKeyCode() == KeyEvent.VK_SUBTRACT) {
+                    handler.zoom(false);
+                }
+            }
+        });
+        mapViewer.setFocusable(true);
     }
 
     private void addNewLocation() {
-        String name = JOptionPane.showInputDialog(this, "Enter location name:");
-        if (name != null && !name.trim().isEmpty()) {
-            handler.addLocation(name, selectedPosition);
+        try {
+            String name = JOptionPane.showInputDialog(this, "Enter location name:");
+            if (name != null && !name.trim().isEmpty()) {
+                handler.addLocation(name, selectedPosition);
+                refreshMap(); // Refresh after adding
+            }
+        } catch (HeadlessException e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error adding location: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -151,5 +184,24 @@ public class MapDialog extends JDialog {
         tempLocations.clear();
         waypoints.clear();
         mapViewer.setOverlayPainter(null);
+    }
+
+    private void refreshMap() {
+        // Store current view state
+        GeoPosition currentPosition = mapViewer.getCenterPosition();
+        int currentZoom = mapViewer.getZoom();
+
+        // Clear and update waypoints
+        mapViewer.setOverlayPainter(null);
+        handler.updateWaypoints();
+
+        // Force map to redraw tiles
+        mapViewer.setAddressLocation(currentPosition);
+        mapViewer.setZoom(currentZoom);
+
+        // Invalidate the map viewer's layout and repaint
+        mapViewer.invalidate();
+        mapViewer.revalidate();
+        mapViewer.repaint();
     }
 }

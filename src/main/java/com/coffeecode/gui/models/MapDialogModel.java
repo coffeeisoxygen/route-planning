@@ -27,7 +27,24 @@ public class MapDialogModel {
     );
 
     public static record TempLocation(String name, GeoPosition position, SaveStatus status) {
-
+        public TempLocation {
+            if (name == null || name.trim().isEmpty()) {
+                throw new IllegalArgumentException("Location name cannot be empty");
+            }
+            if (position == null) {
+                throw new IllegalArgumentException("Position cannot be null");
+            }
+            // Validate coordinates
+            double lat = position.getLatitude();
+            double lon = position.getLongitude();
+            if (lat < -90 || lat > 90) {
+                throw new IllegalArgumentException("Invalid latitude");
+            }
+            if (lon < -180 || lon > 180) {
+                throw new IllegalArgumentException("Invalid longitude");
+            }
+        }
+        
         @Override
         public String toString() {
             return String.format("%s (%.4f, %.4f) [%s]",

@@ -1,5 +1,9 @@
 package com.coffeecode.gui.handlers;
 
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
+
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.VirtualEarthTileFactoryInfo;
@@ -9,6 +13,7 @@ import org.jxmapviewer.viewer.GeoPosition;
 import org.jxmapviewer.viewer.TileFactoryInfo;
 import org.jxmapviewer.viewer.Waypoint;
 import org.jxmapviewer.viewer.WaypointPainter;
+import org.jxmapviewer.viewer.WaypointRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,12 +65,39 @@ public class MapDialogHandler {
 
     public void updateWaypoints() {
         model.getWaypoints().clear();
-        model.getTempLocations().forEach(loc
-                -> model.getWaypoints().add(new DefaultWaypoint(loc.position())));
 
+        // Re-add all temporary locations as waypoints
+        for (TempLocation loc : model.getTempLocations()) {
+            DefaultWaypoint waypoint = new DefaultWaypoint(loc.position()) {
+                @Override
+                public String toString() {
+                    return loc.name();
+                }
+            };
+            model.getWaypoints().add(waypoint);
+        }
+
+        // Update the painter
         WaypointPainter<Waypoint> painter = new WaypointPainter<>();
         painter.setWaypoints(model.getWaypoints());
+        painter.setRenderer(createWaypointRenderer());
+
         mapViewer.setOverlayPainter(painter);
+    }
+
+    private WaypointRenderer<Waypoint> createWaypointRenderer() {
+        return (Graphics2D g, JXMapViewer map, Waypoint wp) -> {
+            Point2D point = map.getTileFactory().geoToPixel(
+                    wp.getPosition(), map.getZoom());
+
+            // Draw point
+            g.setColor(Color.RED);
+            g.fillOval((int) point.getX() - 5, (int) point.getY() - 5, 10, 10);
+
+            // Draw label
+            g.setColor(Color.BLACK);
+            g.drawString(wp.toString(), (int) point.getX() + 5, (int) point.getY());
+        };
     }
 
     public void goToLocation(String locationName) {
@@ -91,4 +123,9 @@ public class MapDialogHandler {
         model.getWaypoints().clear();
         mapViewer.setOverlayPainter(null);
     }
+
+    public JXMapViewer getMapViewer() {
+        return mapViewer;
+    }
+
 }
