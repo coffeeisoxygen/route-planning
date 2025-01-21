@@ -142,3 +142,4 @@ public class GraphAnimation implements ActionListener {
         return isPlaying;
     }
 }
+ 
