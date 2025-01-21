@@ -84,8 +84,9 @@ public class GuiConfig {
     @Bean
     public SpringBox springLayout() {
         SpringBox layout = new SpringBox(false);
-        layout.setForce(0.5);
+        layout.setForce(0.3);  // Reduced force for smoother movement
         layout.setQuality(0.9);
+        layout.setStabilizationLimit(0.001);
         return layout;
     }
 

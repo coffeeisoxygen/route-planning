@@ -21,12 +21,14 @@ public class GraphAnimation implements ActionListener {
     private static final double DEFAULT_RADIUS = 0.05;
     private static final double DEFAULT_JITTER = 0.01;
     private static final double DAMPING = 0.95;
+    private static final double TRANSITION_SPEED = 0.01;
 
     private final Graph graph;
-    private final Timer timer;
     private final Random random;
     private double time = 0;
     private boolean isPlaying = false;
+    private Timer timer;
+    private boolean isResetting = false;
 
     public GraphAnimation(Graph graph) {
         this.graph = graph;
@@ -48,6 +50,23 @@ public class GraphAnimation implements ActionListener {
             isPlaying = false;
             logger.debug("Animation stopped");
         }
+    }
+
+    public void reset() {
+        isResetting = true;
+        time = 0;
+        if (timer != null) {
+            timer.stop();
+        }
+        resetNodePositions();
+        isResetting = false;
+    }
+
+    private void resetNodePositions() {
+        graph.nodes().forEach(node -> {
+            double[] pos = getNodePosition(node);
+            node.setAttribute("xy", pos[0], pos[1]);
+        });
     }
 
     @Override

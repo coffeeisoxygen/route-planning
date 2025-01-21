@@ -2,6 +2,8 @@ package com.coffeecode.gui.handlers;
 
 import java.util.List;
 
+import javax.swing.SwingUtilities;
+
 import org.graphstream.graph.Node;
 import org.graphstream.ui.view.Viewer;
 import org.slf4j.Logger;
@@ -36,32 +38,18 @@ public class GraphPanelHandler {
             viewer.disableAutoLayout();
         }
 
-        try {
+        animation.reset();
+
+        SwingUtilities.invokeLater(() -> {
             model.getGraph().clear();
+            locations.forEach(this::addNode);
+            addEdges(locations);
 
-            // Add nodes
-            for (Locations loc : locations) {
-                addNode(loc);
-            }
-
-            // Add edges
-            for (int i = 0; i < locations.size(); i++) {
-                for (int j = i + 1; j < locations.size(); j++) {
-                    addEdge(locations.get(i), locations.get(j));
-                }
-            }
-
-            if (model.isAutoLayoutEnabled() && viewer != null) {
+            if (viewer != null) {
                 viewer.enableAutoLayout();
-            }
-
-            if (model.isAnimationEnabled()) {
                 animation.start();
             }
-
-        } catch (Exception e) {
-            logger.error("Error updating graph", e);
-        }
+        });
     }
 
     private void addNode(Locations loc) {
@@ -85,6 +73,14 @@ public class GraphPanelHandler {
 
         double distance = distanceService.calculateDistance(loc1, loc2);
         edge.setAttribute("ui.label", String.format("%.2f km", distance));
+    }
+
+    private void addEdges(List<Locations> locations) {
+        for (int i = 0; i < locations.size(); i++) {
+            for (int j = i + 1; j < locations.size(); j++) {
+                addEdge(locations.get(i), locations.get(j));
+            }
+        }
     }
 
     public void setViewer(Viewer viewer) {
