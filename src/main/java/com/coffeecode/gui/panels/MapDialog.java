@@ -1,7 +1,10 @@
 package com.coffeecode.gui.panels;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.FlowLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -58,8 +61,9 @@ public class MapDialog extends JDialog {
     private JPanel createControlPanel() {
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        // Map type selector
+        // Map type selector with default selection
         JComboBox<String> mapType = new JComboBox<>(new String[]{"OpenStreetMap", "VirtualEarth"});
+        mapType.setSelectedIndex(0); // Match default OSM
         mapType.addActionListener(e -> handler.switchMapType(mapType.getSelectedIndex()));
 
         // Location quick jump
@@ -93,14 +97,50 @@ public class MapDialog extends JDialog {
     }
 
     private void setupListeners() {
-        // Click to add location
-        mapViewer.addMouseListener(new MouseAdapter() {
+        MouseAdapter mouseAdapter = new MouseAdapter() {
+            private Point prev;
+
             @Override
             public void mouseClicked(MouseEvent e) {
                 selectedPosition = mapViewer.convertPointToGeoPosition(e.getPoint());
                 addNewLocation();
             }
-        });
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                prev = e.getPoint();
+                mapViewer.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (prev != null) {
+                    Point current = e.getPoint();
+                    int dx = current.x - prev.x;
+                    int dy = current.y - prev.y;
+
+                    Rectangle view = mapViewer.getViewportBounds();
+                    view.x -= dx;
+                    view.y -= dy;
+
+                    GeoPosition newCenter = mapViewer.convertPointToGeoPosition(
+                            new Point(view.x + view.width / 2, view.y + view.height / 2)
+                    );
+                    mapViewer.setCenterPosition(newCenter);
+
+                    prev = current;
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                prev = null;
+                mapViewer.setCursor(Cursor.getDefaultCursor());
+            }
+        };
+
+        mapViewer.addMouseListener(mouseAdapter);
+        mapViewer.addMouseMotionListener(mouseAdapter);
 
         // Keyboard shortcuts for zoom
         mapViewer.addKeyListener(new KeyAdapter() {
@@ -119,14 +159,24 @@ public class MapDialog extends JDialog {
     private void addNewLocation() {
         String name = JOptionPane.showInputDialog(this, "Enter location name:");
         if (name != null && !name.trim().isEmpty()) {
-            try {
-                handler.saveLocation(name, selectedPosition);
-                dispose(); // Close dialog after successful add
-            } catch (LocationOperationException e) {
-                JOptionPane.showMessageDialog(this,
-                        "Error adding location: " + e.getMessage(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Add location: " + name + " at "
+                    + String.format("%.6f, %.6f",
+                            selectedPosition.getLatitude(),
+                            selectedPosition.getLongitude()),
+                    "Confirm Add Location",
+                    JOptionPane.OK_CANCEL_OPTION);
+
+            if (confirm == JOptionPane.OK_OPTION) {
+                try {
+                    handler.saveLocation(name, selectedPosition);
+                    // Don't close dialog - let user add more if needed
+                } catch (LocationOperationException e) {
+                    JOptionPane.showMessageDialog(this,
+                            "Error adding location: " + e.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
             }
         }
     }
