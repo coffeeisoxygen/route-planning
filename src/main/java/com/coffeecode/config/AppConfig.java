@@ -28,7 +28,8 @@ public class AppConfig {
     }
 
     @Bean
-    public LocationService locationService(LocationRepository locationRepository,
+    public LocationService locationService(
+            LocationRepository locationRepository,
             DistanceService distanceService) {
         return new LocationService(locationRepository, distanceService);
     }
