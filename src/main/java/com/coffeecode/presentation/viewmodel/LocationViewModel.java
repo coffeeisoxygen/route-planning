@@ -56,4 +56,25 @@ public class LocationViewModel {
     public LocationManagementUseCase getLocationUseCase() {
         return locationUseCase;
     }
+
+    public void addLocation(String name, double lat, double lon) {
+        Locations newLocation = locationUseCase.addLocation(name, lat, lon);
+        locations.add(newLocation);
+        notifyLocationsChanged();
+    }
+
+    public void deleteLocation(Locations location) {
+        locationUseCase.deleteLocation(location.id());
+        locations.remove(location);
+        if (selectedLocation == location) {
+            selectedLocation = null;
+        }
+        notifyLocationsChanged();
+    }
+
+    public void updateLocation(Locations location, String newName) {
+        locationUseCase.updateLocation(location.id(), newName, 
+            location.latitude(), location.longitude());
+        loadLocations(); // Reload to get updated data
+    }
 }

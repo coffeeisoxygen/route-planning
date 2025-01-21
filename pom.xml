@@ -135,7 +135,14 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>${spring-context.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
+
   </dependencies>
   <repositories>
     <repository>
@@ -185,6 +192,17 @@
         </executions>
       </plugin>
     </plugins>
+
+    <resources>
+        <resource>
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>**/*.png</include>
+                <include>**/*.properties</include>
+                <include>**/*.xml</include>
+            </includes>
+        </resource>
+    </resources>
 
     <pluginManagement>
       <plugins>

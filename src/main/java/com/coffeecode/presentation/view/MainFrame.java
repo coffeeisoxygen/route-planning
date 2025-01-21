@@ -24,7 +24,7 @@ public class MainFrame extends JFrame {
         add(mapComponent, BorderLayout.CENTER);
 
         // Set window size and position
-        setSize(1200, 800);
+        setSize(1000, 600);
         setLocationRelativeTo(null);
     }
 }
