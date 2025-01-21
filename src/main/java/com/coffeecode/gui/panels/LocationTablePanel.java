@@ -1,23 +1,40 @@
 package com.coffeecode.gui.panels;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import com.coffeecode.gui.models.LocationTableModel;
-import com.coffeecode.model.Locations;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+
+import org.springframework.context.ApplicationContext;
+
 import com.coffeecode.gui.controllers.LocationController;
 import com.coffeecode.gui.controllers.LocationOperationException;
+import com.coffeecode.gui.models.LocationTableModel;
+import com.coffeecode.model.Locations;
 
 public class LocationTablePanel extends JPanel {
 
     private final LocationTableModel tableModel;
+    private final ApplicationContext applicationContext;
     private final LocationController controller;
 
-    public LocationTablePanel(LocationTableModel model, LocationController controller) {
+    public LocationTablePanel(LocationTableModel model, LocationController controller, ApplicationContext applicationContext) {
         this.tableModel = model;
+        this.applicationContext = applicationContext;
         this.controller = controller;
-
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(400, 0));
         initComponents();
@@ -141,8 +158,8 @@ public class LocationTablePanel extends JPanel {
     }
 
     private void showMapDialog() {
-        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        MapDialog dialog = new MapDialog(parentFrame, controller);
+        MapDialog dialog = applicationContext.getBean(MapDialog.class);
+        dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
         dialog.setVisible(true);
     }
 

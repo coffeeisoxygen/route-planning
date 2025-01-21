@@ -1,85 +1,130 @@
 package com.coffeecode.gui.panels;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
-import org.jxmapviewer.VirtualEarthTileFactoryInfo;
-import org.jxmapviewer.viewer.*;
-import org.jxmapviewer.painter.WaypointPainter;
-import org.jxmapviewer.viewer.DefaultWaypoint;
+import org.jxmapviewer.viewer.DefaultTileFactory;
+import org.jxmapviewer.viewer.GeoPosition;
+import org.jxmapviewer.viewer.TileFactoryInfo;
 import org.jxmapviewer.viewer.Waypoint;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.coffeecode.gui.controllers.LocationController;
+import com.coffeecode.gui.handlers.MapDialogHandler;
+import com.coffeecode.gui.models.MapDialogModel;
+import com.coffeecode.gui.models.MapDialogModel.TempLocation;
 
+@Component
 public class MapDialog extends JDialog {
+
+    private final transient MapDialogModel model;
+    private final transient MapDialogHandler handler;
+    private final transient LocationController controller;
     private final JXMapViewer mapViewer;
-    private final LocationController controller;
-    private final List<TempLocation> tempLocations = new ArrayList<>();
-    private final Set<Waypoint> waypoints = new HashSet<>();
     private GeoPosition selectedPosition;
+    private final DefaultListModel<TempLocation> listModel;
+    private final transient List<TempLocation> tempLocations;
+    private final transient Set<Waypoint> waypoints;
 
-    private static record TempLocation(String name, GeoPosition position) {}
-
-    public MapDialog(JFrame parent, LocationController controller) {
-        super(parent, "Select Location", true);
+    @Autowired
+    public MapDialog(MapDialogModel model, MapDialogHandler handler, LocationController controller) {
+        this.model = model;
+        this.handler = handler;
         this.controller = controller;
+        this.mapViewer = new JXMapViewer();
+        this.listModel = new DefaultListModel<>();
+        this.tempLocations = new ArrayList<>();
+        this.waypoints = new HashSet<>();
 
+        setTitle("Select Location");
         setSize(800, 600);
-        setLocationRelativeTo(parent);
-        
+        setLocationRelativeTo(null);
+        setModal(true);
+
+        initComponents();
+        setupListeners();
+    }
+
+    private void initComponents() {
+        // Create controls panel
+        JPanel controls = createControlPanel();
+
+        // Create location list panel
+        JScrollPane listPane = createLocationListPanel();
+
         // Initialize map
-        mapViewer = new JXMapViewer();
         TileFactoryInfo info = new OSMTileFactoryInfo();
-        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
-        mapViewer.setTileFactory(tileFactory);
-
-        // Set default position (e.g., Jakarta)
-        GeoPosition jakarta = new GeoPosition(-6.200000, 106.816666);
-        mapViewer.setAddressLocation(jakarta);
+        mapViewer.setTileFactory(new DefaultTileFactory(info));
+        mapViewer.setAddressLocation(MapDialogModel.DEFAULT_LOCATIONS.get("Jakarta"));
         mapViewer.setZoom(7);
-
-        // Add map type selector
-        JComboBox<String> mapTypeCombo = new JComboBox<>(new String[]{"OpenStreetMap", "Satellite"});
-        mapTypeCombo.addActionListener(e -> switchMapType(mapTypeCombo.getSelectedIndex()));
-
-        // Add zoom controls
-        JButton zoomIn = new JButton("+");
-        JButton zoomOut = new JButton("-");
-        zoomIn.addActionListener(e -> mapViewer.setZoom(mapViewer.getZoom() - 1));
-        zoomOut.addActionListener(e -> mapViewer.setZoom(mapViewer.getZoom() + 1));
-
-        // Add location list
-        DefaultListModel<String> locationListModel = new DefaultListModel<>();
-        JList<String> locationList = new JList<>(locationListModel);
-        JScrollPane listScroll = new JScrollPane(locationList);
-        listScroll.setPreferredSize(new Dimension(200, 0));
-
-        // Add control panel
-        JPanel controls = new JPanel(new FlowLayout());
-        controls.add(mapTypeCombo);
-        controls.add(zoomIn);
-        controls.add(zoomOut);
-        JButton saveButton = new JButton("Save All");
-        JButton cancelButton = new JButton("Cancel");
-        controls.add(saveButton);
-        controls.add(cancelButton);
-
-        saveButton.addActionListener(e -> saveLocations());
-        cancelButton.addActionListener(e -> dispose());
 
         // Layout
         setLayout(new BorderLayout());
         add(controls, BorderLayout.NORTH);
         add(mapViewer, BorderLayout.CENTER);
-        add(listScroll, BorderLayout.EAST);
+        add(listPane, BorderLayout.EAST);
+    }
 
-        // Update click listener
+    private JPanel createControlPanel() {
+        JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        JComboBox<String> mapType = new JComboBox<>(new String[]{"OpenStreetMap", "VirtualEarth"});
+        mapType.addActionListener(e -> handler.switchMapType(mapType.getSelectedIndex()));
+
+        JComboBox<String> locations = new JComboBox<>(MapDialogModel.DEFAULT_LOCATIONS.keySet().toArray(String[]::new));
+        locations.addActionListener(e -> handler.goToLocation((String) locations.getSelectedItem()));
+
+        controls.add(new JLabel("Map:"));
+        controls.add(mapType);
+        controls.add(new JLabel("Go to:"));
+        controls.add(locations);
+
+        return controls;
+    }
+
+    private JScrollPane createLocationListPanel() {
+        JList<TempLocation> locationList = new JList<>(listModel);
+        JScrollPane scrollPane = new JScrollPane(locationList);
+        scrollPane.setPreferredSize(new Dimension(250, 0));
+
+        JPanel buttonPanel = new JPanel();
+        JButton saveButton = new JButton("Save All");
+        JButton clearButton = new JButton("Clear");
+
+        saveButton.addActionListener(e -> saveLocations());
+        clearButton.addActionListener(e -> clearLocations());
+
+        buttonPanel.add(saveButton);
+        buttonPanel.add(clearButton);
+
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.add(scrollPane, BorderLayout.CENTER);
+        wrapper.add(buttonPanel, BorderLayout.SOUTH);
+
+        return scrollPane;
+    }
+
+    private void setupListeners() {
         mapViewer.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -92,36 +137,19 @@ public class MapDialog extends JDialog {
     private void addNewLocation() {
         String name = JOptionPane.showInputDialog(this, "Enter location name:");
         if (name != null && !name.trim().isEmpty()) {
-            TempLocation temp = new TempLocation(name, selectedPosition);
-            tempLocations.add(temp);
-            updateWaypoints();
-            updateLocationList();
+            handler.addLocation(name, selectedPosition);
         }
     }
 
-    private void updateWaypoints() {
-        waypoints.clear();
-        tempLocations.forEach(loc -> 
-            waypoints.add(new DefaultWaypoint(loc.position())));
-        WaypointPainter<Waypoint> painter = new WaypointPainter<>();
-        painter.setWaypoints(waypoints);
-        mapViewer.setOverlayPainter(painter);
-    }
-
     private void saveLocations() {
-        tempLocations.forEach(loc -> 
-            controller.addLocation(loc.name(), 
-                loc.position().getLatitude(), 
-                loc.position().getLongitude()));
+        handler.saveLocations();
         dispose();
     }
 
-    private void switchMapType(int type) {
-        TileFactoryInfo info = switch(type) {
-            case 0 -> new OSMTileFactoryInfo();
-            case 1 -> new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.MAP);
-            default -> new OSMTileFactoryInfo();
-        };
-        mapViewer.setTileFactory(new DefaultTileFactory(info));
+    private void clearLocations() {
+        listModel.clear();
+        tempLocations.clear();
+        waypoints.clear();
+        mapViewer.setOverlayPainter(null);
     }
 }

@@ -1,13 +1,14 @@
 package com.coffeecode.gui.controllers;
 
-import com.coffeecode.service.LocationService;
-import com.coffeecode.gui.models.LocationTableModel;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.coffeecode.gui.models.LocationTableModel;
+import com.coffeecode.service.LocationService;
 
 @Component
 public class LocationController {
@@ -56,4 +57,5 @@ public class LocationController {
             throw new LocationOperationException("Failed to update location", e);
         }
     }
+
 }
