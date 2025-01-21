@@ -9,7 +9,7 @@ import com.coffeecode.model.Locations;
 
 public class LocationTableModel extends AbstractTableModel {
 
-    private List<LocationTableListener> listeners = new ArrayList<>();
+    private final List<LocationTableListener> listeners = new ArrayList<>();
     private final List<Locations> locations = new ArrayList<>();
     private final String[] columns = {"Name", "Latitude", "Longitude", "Actions"};
 

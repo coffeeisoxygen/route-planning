@@ -4,40 +4,76 @@ import java.util.List;
 
 import org.graphstream.graph.Node;
 import org.graphstream.ui.view.Viewer;
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.coffeecode.gui.animation.GraphAnimation;
 import com.coffeecode.gui.models.GraphPanelModel;
 import com.coffeecode.model.Locations;
 import com.coffeecode.service.DistanceService;
 
-@Component
 public class GraphPanelHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GraphPanelHandler.class);
 
     private final GraphPanelModel model;
     private final DistanceService distanceService;
+    private final GraphAnimation animation;
     private Viewer viewer;
 
-    public GraphPanelHandler(GraphPanelModel model, DistanceService distanceService) {
+    public GraphPanelHandler(GraphPanelModel model,
+            DistanceService distanceService,
+            GraphAnimation animation) {
         this.model = model;
         this.distanceService = distanceService;
+        this.animation = animation;
     }
 
     public void updateLocations(List<Locations> locations) {
-        model.getGraph().clear();
+        logger.debug("Updating graph with {} locations", locations.size());
 
-        // Add nodes
-        for (Locations loc : locations) {
-            Node node = model.getGraph().addNode(loc.id().toString());
-            node.setAttribute("ui.label", loc.name());
-            node.setAttribute("xy", loc.longitude(), loc.latitude());
+        if (viewer != null) {
+            viewer.disableAutoLayout();
         }
 
-        // Add edges
-        for (int i = 0; i < locations.size(); i++) {
-            for (int j = i + 1; j < locations.size(); j++) {
-                addEdge(locations.get(i), locations.get(j));
+        try {
+            model.getGraph().clear();
+
+            // Add nodes
+            for (Locations loc : locations) {
+                addNode(loc);
             }
+
+            // Add edges
+            for (int i = 0; i < locations.size(); i++) {
+                for (int j = i + 1; j < locations.size(); j++) {
+                    addEdge(locations.get(i), locations.get(j));
+                }
+            }
+
+            if (model.isAutoLayoutEnabled() && viewer != null) {
+                viewer.enableAutoLayout();
+            }
+
+            if (model.isAnimationEnabled()) {
+                animation.start();
+            }
+
+        } catch (Exception e) {
+            logger.error("Error updating graph", e);
         }
+    }
+
+    private void addNode(Locations loc) {
+        String nodeId = loc.id().toString();
+        Node node = model.getGraph().addNode(nodeId);
+
+        // Scale coordinates
+        double x = (loc.longitude() + 180) / 360.0 * 2 - 1;
+        double y = (loc.latitude() + 90) / 180.0 * 2 - 1;
+
+        node.setAttribute("xy", x, y);
+        node.setAttribute("ui.label", loc.name());
     }
 
     private void addEdge(Locations loc1, Locations loc2) {
