@@ -22,7 +22,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.coffeecode.App;
 import com.coffeecode.gui.controllers.LocationController;
-import com.coffeecode.gui.controllers.LocationOperationException;
+import com.coffeecode.gui.exception.LocationOperationException;
 import com.coffeecode.gui.models.LocationTableModel;
 import com.coffeecode.model.Locations;
 

@@ -3,9 +3,7 @@ package com.coffeecode.config;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.graphstream.ui.layout.springbox.implementations.SpringBox;
-import org.graphstream.ui.swing_viewer.SwingViewer;
-import org.graphstream.ui.view.Viewer;
-import org.graphstream.ui.view.ViewerPipe;
+import org.graphstream.ui.swing_viewer.util.DefaultMouseManager;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.viewer.DefaultTileFactory;
@@ -17,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 
 import com.coffeecode.gui.MainFrame;
 import com.coffeecode.gui.controllers.LocationController;
-import com.coffeecode.gui.event.GraphMouseManager;
 import com.coffeecode.gui.handlers.GraphPanelHandler;
 import com.coffeecode.gui.handlers.MapDialogHandler;
 import com.coffeecode.gui.models.GraphPanelModel;
@@ -31,11 +28,6 @@ import com.coffeecode.service.LocationService;
 @Configuration
 @ComponentScan(basePackages = "com.coffeecode.gui")
 public class GuiConfig {
-
-    static {
-        // Must be set before any GraphStream initialization
-        System.setProperty("org.graphstream.ui", "swing");
-    }
 
     @Bean
     public MapDialogModel mapDialogModel() {
@@ -82,39 +74,21 @@ public class GuiConfig {
 
     @Bean
     public Graph locationGraph() {
+        System.setProperty("org.graphstream.ui", "swing");
         Graph graph = new SingleGraph("Locations");
-        graph.setAttribute("ui.quality");
         graph.setAttribute("ui.antialias");
-        // Add this to ensure proper rendering
-        graph.setAttribute("ui.stylesheet", GraphPanelModel.STYLESHEET);
+        graph.setAttribute("ui.quality");
         return graph;
     }
 
     @Bean
     public SpringBox springLayout() {
         SpringBox layout = new SpringBox(false);
-        // Optimize layout parameters
-        layout.setForce(0.8);         // Increase force for better movement
-        layout.setQuality(0.9);       // High quality
-        layout.setStabilizationLimit(0.001);  // Lower for more movement
-        layout.setGravityFactor(0.9); // Stronger gravity
+        layout.setForce(0.5);        // More stable force
+        layout.setQuality(0.9);      // Higher quality
+        layout.setStabilizationLimit(0.001);
+        layout.setGravityFactor(0.9);
         return layout;
-    }
-
-    @Bean
-    public ViewerPipe viewerPipe(Graph locationGraph) {
-        // Create viewer first
-        SwingViewer viewer = new SwingViewer(locationGraph,
-                Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
-        viewer.enableAutoLayout();
-
-        // Then create and return the pipe
-        return viewer.newViewerPipe();
-    }
-
-    @Bean
-    public GraphMouseManager graphMouseManager(Graph locationGraph) {
-        return new GraphMouseManager(locationGraph);
     }
 
     @Bean
@@ -128,7 +102,12 @@ public class GuiConfig {
             SpringBox springLayout,
             LocationTableModel tableModel,
             GraphPanelHandler handler,
-            GraphMouseManager mouseManager) {
+            DefaultMouseManager mouseManager) {
         return new GraphPanel(locationGraph, springLayout, tableModel, handler, mouseManager);
+    }
+
+    @Bean
+    public DefaultMouseManager mouseManager() {
+        return new DefaultMouseManager();
     }
 }

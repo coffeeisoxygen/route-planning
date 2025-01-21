@@ -28,43 +28,33 @@ public class GraphPanelHandler {
     }
 
     public void updateLocations(List<Locations> locations) {
-        logger.debug("Updating graph with {} locations", locations.size());
-
         SwingUtilities.invokeLater(() -> {
-            // Temporarily disable layout for batch updates
-            model.getGraph().setAttribute("layout.frozen");
+            try {
+                logger.debug("Updating graph with {} locations", locations.size());
+                model.getGraph().clear();
 
-            model.getGraph().clear();
+                // First add all nodes
+                locations.forEach(loc -> addNode(loc));
 
-            // Add nodes with smooth positioning
-            locations.forEach(loc -> {
-                Node node = addNode(loc);
-                // Add initial position for smooth transition
-                double x = transformLongitude(loc.longitude());
-                double y = transformLatitude(loc.latitude());
-                node.setAttribute("xy", x, y);
-            });
-
-            // Add edges
-            for (int i = 0; i < locations.size(); i++) {
-                for (int j = i + 1; j < locations.size(); j++) {
-                    addEdge(locations.get(i), locations.get(j));
+                // Then add edges using same ID format
+                for (int i = 0; i < locations.size(); i++) {
+                    for (int j = i + 1; j < locations.size(); j++) {
+                        addEdge(locations.get(i), locations.get(j));
+                    }
                 }
+            } catch (Exception e) {
+                logger.error("Failed to update locations", e);
             }
-
-            // Re-enable layout for animation
-            model.getGraph().removeAttribute("layout.frozen");
         });
     }
 
     private Node addNode(Locations loc) {
-        String nodeId = loc.id().toString();
+        // Use short ID format
+        String nodeId = loc.id().toString().split("-")[0];
         Node node = model.getGraph().addNode(nodeId);
-
-        // Transform coordinates to graph space (-1 to 1 range)
+        
         double x = transformLongitude(loc.longitude());
         double y = transformLatitude(loc.latitude());
-
         node.setAttribute("xy", x, y);
         node.setAttribute("ui.label", loc.name());
         
@@ -72,12 +62,12 @@ public class GraphPanelHandler {
     }
 
     private void addEdge(Locations loc1, Locations loc2) {
-        String edgeId = String.format("%s-%s", loc1.id(), loc2.id());
-        var edge = model.getGraph().addEdge(edgeId,
-                loc1.id().toString(),
-                loc2.id().toString(),
-                false);
+        // Use same ID format as nodes
+        String id1 = loc1.id().toString().split("-")[0];
+        String id2 = loc2.id().toString().split("-")[0];
+        String edgeId = String.format("%s-%s", id1, id2);
 
+        var edge = model.getGraph().addEdge(edgeId, id1, id2, false);
         double distance = distanceService.calculateDistance(loc1, loc2);
         edge.setAttribute("ui.label", String.format("%.1f km", distance));
     }

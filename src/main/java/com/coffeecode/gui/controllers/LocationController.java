@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.coffeecode.gui.exception.LocationOperationException;
 import com.coffeecode.gui.models.LocationTableModel;
 import com.coffeecode.service.LocationService;
 

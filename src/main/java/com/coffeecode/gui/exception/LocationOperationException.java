@@ -1,4 +1,4 @@
-package com.coffeecode.gui.controllers;
+package com.coffeecode.gui.exception;
 
 public class LocationOperationException extends RuntimeException {
 

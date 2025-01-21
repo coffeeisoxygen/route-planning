@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.coffeecode.gui.controllers.LocationController;
-import com.coffeecode.gui.controllers.LocationOperationException;
+import com.coffeecode.gui.exception.LocationOperationException;
 import com.coffeecode.gui.handlers.MapDialogHandler;
 import com.coffeecode.gui.models.MapDialogModel;
 
