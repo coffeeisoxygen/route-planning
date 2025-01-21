@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.coffeecode.application.port.input.RouteCalculationUseCase;
 import com.coffeecode.application.port.output.LocationPersistancePort;
 import com.coffeecode.application.port.output.RouteCalculationPort;
+import com.coffeecode.domain.exception.LocationNotFoundException;
 import com.coffeecode.domain.model.Locations;
 
 @Service
@@ -24,9 +25,9 @@ public class RouteServiceImpl implements RouteCalculationUseCase {
     @Override
     public List<Locations> calculateRoute(UUID startId, UUID endId) {
         Locations start = locationPort.findById(startId)
-                .orElseThrow(() -> new IllegalArgumentException("Start location not found"));
+                .orElseThrow(() -> new LocationNotFoundException("Start location not found: " + startId));
         Locations end = locationPort.findById(endId)
-                .orElseThrow(() -> new IllegalArgumentException("End location not found"));
+                .orElseThrow(() -> new LocationNotFoundException("End location not found: " + endId));
 
         return routePort.findShortestPath(start, end);
     }

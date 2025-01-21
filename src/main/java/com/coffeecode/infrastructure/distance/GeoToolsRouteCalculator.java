@@ -1,10 +1,18 @@
 package com.coffeecode.infrastructure.distance;
 
+import java.util.List;
+
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.GeodeticCalculator;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.stereotype.Component;
 import com.coffeecode.application.port.output.RouteCalculationPort;
+import com.coffeecode.domain.model.Locations;
 
 @Component
 public class GeoToolsRouteCalculator implements RouteCalculationPort {
+
     private final CoordinateReferenceSystem crsWGS84;
 
     public GeoToolsRouteCalculator() {
@@ -20,12 +28,12 @@ public class GeoToolsRouteCalculator implements RouteCalculationPort {
         GeodeticCalculator calc = new GeodeticCalculator(crsWGS84);
         calc.setStartingGeographicPoint(from.longitude(), from.latitude());
         calc.setDestinationGeographicPoint(to.longitude(), to.latitude());
-        return calc.getOrthodromicDistance() / 1000.0;
+        return calc.getOrthodromicDistance() / 1000.0; // Convert to kilometers
     }
 
     @Override
     public List<Locations> findShortestPath(Locations start, Locations end) {
-        // Implement path finding algorithm
-        return List.of(start, end); // Placeholder
+        // For now, just return direct path
+        return List.of(start, end);
     }
 }

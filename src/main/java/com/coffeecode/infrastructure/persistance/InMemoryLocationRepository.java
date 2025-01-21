@@ -59,4 +59,5 @@ public class InMemoryLocationRepository implements LocationPersistancePort {
                 loc1.distanceTo(latitude, longitude),
                 loc2.distanceTo(latitude, longitude)));
     }
+
 }

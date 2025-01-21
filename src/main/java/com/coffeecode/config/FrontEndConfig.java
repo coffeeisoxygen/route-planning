@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
     "com.coffeecode.gui.panels",
     "com.coffeecode.gui"
 })
-public class GuiConfig {
+public class FrontEndConfig {
 
     @Bean
     public Graph routeGraph() {
