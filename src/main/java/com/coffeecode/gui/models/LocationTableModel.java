@@ -70,6 +70,7 @@ public class LocationTableModel extends AbstractTableModel {
         locations.clear();
         locations.addAll(newLocations);
         fireTableDataChanged();
+        notifyListeners();
     }
 
     public Locations getLocationAt(int row) {
