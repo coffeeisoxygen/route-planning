@@ -12,12 +12,13 @@ import com.coffeecode.service.LocationService;
 
 @Component
 public class LocationController {
-    private final LocationService locationService;
+
+    private final LocationService service;
     private final LocationTableModel tableModel;
 
     @Autowired
     public LocationController(LocationService locationService, LocationTableModel tableModel) {
-        this.locationService = locationService;
+        this.service = locationService;
         this.tableModel = tableModel;
         initialize(); // Load initial data
     }
@@ -28,13 +29,13 @@ public class LocationController {
     }
 
     public void refreshLocations() {
-        tableModel.updateLocations(locationService.getAllLocations());
+        tableModel.updateLocations(service.getAllLocations());
     }
 
     public void addLocation(String name, double lat, double lon) {
         try {
-            locationService.addLocation(name, lat, lon);
-            refreshLocations();
+            service.addLocation(name, lat, lon);
+            updateTableModel(); // Ensure this is called
         } catch (IllegalArgumentException e) {
             throw new LocationOperationException("Failed to add location", e);
         }
@@ -42,7 +43,7 @@ public class LocationController {
 
     public void deleteLocation(UUID id) {
         try {
-            locationService.deleteLocation(id);
+            service.deleteLocation(id);
             refreshLocations();
         } catch (Exception e) {
             throw new LocationOperationException("Failed to delete location", e);
@@ -51,11 +52,15 @@ public class LocationController {
 
     public void updateLocation(UUID id, String name, double lat, double lon) {
         try {
-            locationService.updateLocation(id, name, lat, lon);
+            service.updateLocation(id, name, lat, lon);
             refreshLocations();
         } catch (Exception e) {
             throw new LocationOperationException("Failed to update location", e);
         }
+    }
+
+    private void updateTableModel() {
+        tableModel.setLocations(service.getAllLocations());
     }
 
 }

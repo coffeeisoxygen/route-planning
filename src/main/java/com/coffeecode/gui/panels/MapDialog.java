@@ -27,6 +27,8 @@ import com.coffeecode.gui.controllers.LocationOperationException;
 import com.coffeecode.gui.handlers.MapDialogHandler;
 import com.coffeecode.gui.models.MapDialogModel;
 
+// ? [ ] MARK: Add MouseMotion
+//  [ ] todo : FIx Implementation about waypoint
 @Component
 public class MapDialog extends JDialog {
 

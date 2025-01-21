@@ -1,12 +1,15 @@
 package com.coffeecode.gui.models;
 
-import javax.swing.table.AbstractTableModel;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.table.AbstractTableModel;
+
 import com.coffeecode.model.Locations;
 
 public class LocationTableModel extends AbstractTableModel {
 
+    private List<LocationTableListener> listeners = new ArrayList<>();
     private final List<Locations> locations = new ArrayList<>();
     private final String[] columns = {"Name", "Latitude", "Longitude", "Actions"};
 
@@ -79,8 +82,6 @@ public class LocationTableModel extends AbstractTableModel {
     }
 
     // Observer pattern for GraphStream
-    private List<LocationTableListener> listeners = new ArrayList<>();
-
     public interface LocationTableListener {
 
         void onLocationChanged(List<Locations> locations);
@@ -90,7 +91,16 @@ public class LocationTableModel extends AbstractTableModel {
         listeners.add(listener);
     }
 
+    public void setLocations(List<Locations> locations) {
+        this.locations.clear();
+        this.locations.addAll(locations);
+        fireTableDataChanged();
+        notifyListeners();
+    }
+
     private void notifyListeners() {
-        listeners.forEach(l -> l.onLocationChanged(new ArrayList<>(locations)));
+        for (LocationTableListener listener : listeners) {
+            listener.onLocationChanged(new ArrayList<>(locations));
+        }
     }
 }

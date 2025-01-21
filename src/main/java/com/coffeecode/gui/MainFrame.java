@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.coffeecode.gui.controllers.LocationController;
 import com.coffeecode.gui.models.LocationTableModel;
+import com.coffeecode.gui.panels.GraphPanel;
 import com.coffeecode.gui.panels.LocationTablePanel;
 
 @Component
@@ -20,9 +21,9 @@ public class MainFrame extends JFrame {
     private final ApplicationContext applicationContext;
 
     @Autowired
-    public MainFrame(LocationController controller, 
-                    LocationTableModel tableModel,
-                    ApplicationContext applicationContext) {
+    public MainFrame(LocationController controller,
+            LocationTableModel tableModel,
+            ApplicationContext applicationContext) {
         this.controller = controller;
         this.tableModel = tableModel;
         this.applicationContext = applicationContext;
@@ -32,12 +33,10 @@ public class MainFrame extends JFrame {
 
     private void initComponents() {
         LocationTablePanel tablePanel = new LocationTablePanel(tableModel, controller, applicationContext);
-        //GraphPanel graphPanel = new GraphPanel(graph, tableModel);
-        //StatisticsPanel statsPanel = new StatisticsPanel(tableModel);
+        GraphPanel graphPanel = applicationContext.getBean(GraphPanel.class);
 
         add(tablePanel, BorderLayout.WEST);
-        //add(graphPanel, BorderLayout.CENTER);
-        //add(statsPanel, BorderLayout.EAST);
+        add(graphPanel, BorderLayout.CENTER);
     }
 
     private void setupFrame() {
