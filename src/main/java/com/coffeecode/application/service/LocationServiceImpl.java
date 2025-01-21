@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import com.coffeecode.application.port.input.LocationManagementUseCase;
@@ -15,6 +16,7 @@ import com.coffeecode.domain.exception.LocationNotFoundException;
 import com.coffeecode.domain.model.Locations;
 
 @Service
+@Primary
 public class LocationServiceImpl implements
         LocationManagementUseCase,
         LocationQueryUseCase {

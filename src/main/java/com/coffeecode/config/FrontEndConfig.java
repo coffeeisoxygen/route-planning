@@ -12,9 +12,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan(basePackages = {
-    "com.coffeecode.gui.controllers",
-    "com.coffeecode.gui.panels",
-    "com.coffeecode.gui"
+    "com.coffeecode.presentation.view",
+    "com.coffeecode.presentation.viewmodel",
+    "com.coffeecode.presentation.view.components"
 })
 public class FrontEndConfig {
 

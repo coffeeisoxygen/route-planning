@@ -43,4 +43,17 @@ public class LocationViewModel {
     private void notifyLocationsChanged() {
         listeners.forEach(l -> l.onLocationsChanged(locations));
     }
+
+    // Add getters
+    public List<Locations> getLocations() {
+        return new ArrayList<>(locations); // Return copy for immutability
+    }
+
+    public Locations getSelectedLocation() {
+        return selectedLocation;
+    }
+
+    public LocationManagementUseCase getLocationUseCase() {
+        return locationUseCase;
+    }
 }

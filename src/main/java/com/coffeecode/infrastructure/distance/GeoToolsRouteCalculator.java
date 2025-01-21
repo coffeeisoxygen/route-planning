@@ -6,11 +6,13 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.GeodeticCalculator;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import com.coffeecode.application.port.output.RouteCalculationPort;
 import com.coffeecode.domain.model.Locations;
 
 @Component
+@Primary  // Add this annotation
 public class GeoToolsRouteCalculator implements RouteCalculationPort {
 
     private final CoordinateReferenceSystem crsWGS84;
