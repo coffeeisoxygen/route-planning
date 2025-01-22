@@ -1,4 +1,4 @@
-package com.coffeecode.presentation.viewmodel;
+package com.coffeecode.presentation.view.components.map;
 
 import org.jxmapviewer.viewer.DefaultWaypoint;
 import org.jxmapviewer.viewer.GeoPosition;
@@ -16,10 +16,5 @@ public class LocationWaypoint extends DefaultWaypoint {
 
     public Locations getLocation() {
         return location;
-    }
-
-    @Override
-    public String toString() {
-        return location.name();
     }
 }

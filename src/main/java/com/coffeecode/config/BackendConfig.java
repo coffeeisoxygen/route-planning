@@ -1,15 +1,32 @@
 package com.coffeecode.config;
 
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
+import com.coffeecode.application.port.output.LocationPersistancePort;
+import com.coffeecode.domain.util.DistanceCalculator;
+import com.coffeecode.infrastructure.distance.GeoToolsCalculator;
+import com.coffeecode.infrastructure.persistance.InMemoryLocationRepository;
 
 @Configuration
 @ComponentScan(basePackages = {
-    "com.coffeecode.application.service",
     "com.coffeecode.infrastructure.persistance",
     "com.coffeecode.infrastructure.distance"
 })
+@Import(ModelConfig.class)
 public class BackendConfig {
-    // Remove locationService bean if defined here
+
+    @Bean
+    @Primary
+    public DistanceCalculator distanceCalculator() {
+        return new GeoToolsCalculator();
+    }
+
+    @Bean
+    public LocationPersistancePort locationRepository(DistanceCalculator calculator) {
+        return new InMemoryLocationRepository(calculator);
+    }
 }

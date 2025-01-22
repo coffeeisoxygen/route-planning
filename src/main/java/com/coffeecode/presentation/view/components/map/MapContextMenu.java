@@ -1,13 +1,15 @@
 package com.coffeecode.presentation.view.components.map;
 
-import javax.swing.*;
+import java.awt.Component;
+
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.GeoPosition;
 
-import com.coffeecode.presentation.viewmodel.LocationViewModel;
-
-import java.awt.Component;
+import com.coffeecode.presentation.viewmodel.impl.LocationViewModel;
 
 public class MapContextMenu extends JPopupMenu {
 

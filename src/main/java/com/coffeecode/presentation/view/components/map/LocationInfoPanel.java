@@ -1,10 +1,11 @@
 package com.coffeecode.presentation.view.components.map;
 
-import javax.swing.*;
+import java.awt.Color;
 
-import com.coffeecode.presentation.viewmodel.LocationWaypoint;
-
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 public class LocationInfoPanel extends JPanel {
 

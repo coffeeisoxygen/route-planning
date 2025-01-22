@@ -1,19 +1,21 @@
 package com.coffeecode.application.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import java.util.Optional;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.coffeecode.application.port.output.LocationPersistancePort;
-import com.coffeecode.application.port.output.RouteCalculationPort;
 import com.coffeecode.domain.model.Locations;
+import com.coffeecode.domain.model.RouteMap;
 
 @ExtendWith(MockitoExtension.class)
 class LocationServiceImplTest {
@@ -21,30 +23,44 @@ class LocationServiceImplTest {
     @Mock
     private LocationPersistancePort persistancePort;
     @Mock
-    private RouteCalculationPort routeCalculationPort;
-
-    private LocationServiceImpl service;
+    private RouteMap routeMap;
+    private LocationServiceImpl locationService;
+    private Locations testLocation;
 
     @BeforeEach
     void setUp() {
-        service = new LocationServiceImpl(persistancePort, routeCalculationPort);
+        locationService = new LocationServiceImpl(persistancePort, routeMap);
+        testLocation = new Locations("Test", -6.914744, 107.609810);
     }
 
     @Test
-    void shouldAddLocation() {
-        String name = "Test Location";
-        double lat = 0, lon = 0;
+    void addLocation_shouldSaveAndAddToRouteMap() {
+        when(persistancePort.save(any(Locations.class))).thenReturn(testLocation);
 
-        when(persistancePort.save(any(Locations.class)))
-                .thenAnswer(i -> i.getArgument(0));
+        Locations result = locationService.addLocation("Test", -6.914744, 107.609810);
 
-        Locations result = service.addLocation(name, lat, lon);
+        assertEquals(testLocation, result);
+        verify(persistancePort).save(any(Locations.class));
+        verify(routeMap).addLocation(testLocation);
+    }
 
-        assertNotNull(result);
-        assertEquals(name, result.name());
-        assertEquals(lat, result.latitude());
-        assertEquals(lon, result.longitude());
+    @Test
+    void deleteLocation_whenExists_shouldDeleteAndNotify() {
+        when(persistancePort.findById(testLocation.id())).thenReturn(Optional.of(testLocation));
+
+        locationService.deleteLocation(testLocation.id());
+
+        verify(persistancePort).delete(testLocation.id());
+    }
+
+    @Test
+    void updateLocation_whenExists_shouldUpdateBoth() {
+        UUID id = testLocation.id();
+        when(persistancePort.exists(id)).thenReturn(true);
+
+        locationService.updateLocation(id, "Updated", -6.0, 107.0);
 
         verify(persistancePort).save(any(Locations.class));
+        verify(routeMap).addLocation(any(Locations.class));
     }
 }

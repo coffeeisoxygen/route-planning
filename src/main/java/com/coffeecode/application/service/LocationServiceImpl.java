@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 import com.coffeecode.application.port.input.LocationManagementUseCase;
 import com.coffeecode.application.port.input.LocationQueryUseCase;
 import com.coffeecode.application.port.output.LocationPersistancePort;
-import com.coffeecode.application.port.output.RouteCalculationPort;
 import com.coffeecode.domain.exception.LocationNotFoundException;
 import com.coffeecode.domain.model.Locations;
+import com.coffeecode.domain.model.RouteMap;
 
 @Service
 @Primary
@@ -22,24 +22,30 @@ public class LocationServiceImpl implements
         LocationQueryUseCase {
 
     private final LocationPersistancePort persistancePort;
-    private final RouteCalculationPort routeCalculationPort;
+    private final RouteMap routeMap;
 
     @Autowired
     public LocationServiceImpl(
             LocationPersistancePort persistancePort,
-            RouteCalculationPort routeCalculationPort) {
+            RouteMap routeMap) {
         this.persistancePort = persistancePort;
-        this.routeCalculationPort = routeCalculationPort;
+        this.routeMap = routeMap;
     }
 
     @Override
     public Locations addLocation(String name, double lat, double lon) {
-        return persistancePort.save(new Locations(name, lat, lon));
+        Locations newLocation = new Locations(name, lat, lon);
+        Locations saved = persistancePort.save(newLocation);
+        routeMap.addLocation(saved); // This will create routes automatically
+        return saved;
     }
 
     @Override
     public void deleteLocation(UUID id) {
-        persistancePort.delete(id);
+        persistancePort.findById(id).ifPresent(location -> {
+            persistancePort.delete(id);
+            // RouteMap will handle route cleanup
+        });
     }
 
     @Override
@@ -47,7 +53,9 @@ public class LocationServiceImpl implements
         if (!persistancePort.exists(id)) {
             throw new LocationNotFoundException("Location not found: " + id);
         }
-        persistancePort.save(new Locations(id, name, lat, lon));
+        Locations updated = new Locations(id, name, lat, lon);
+        persistancePort.save(updated);
+        routeMap.addLocation(updated); // This will update routes automatically
     }
 
     @Override

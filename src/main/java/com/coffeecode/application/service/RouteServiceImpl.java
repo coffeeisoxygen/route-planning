@@ -1,44 +1,33 @@
 package com.coffeecode.application.service;
 
-import java.util.List;
+import java.util.Collection;
+
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-import com.coffeecode.application.port.input.RouteCalculationUseCase;
-import com.coffeecode.application.port.output.LocationPersistancePort;
-import com.coffeecode.application.port.output.RouteCalculationPort;
-import com.coffeecode.domain.exception.LocationNotFoundException;
-import com.coffeecode.domain.model.Locations;
+import com.coffeecode.domain.exception.RouteNotFoundException;
+import com.coffeecode.domain.model.Route;
+import com.coffeecode.domain.model.RouteMap;
 
 @Service
-public class RouteServiceImpl implements RouteCalculationUseCase {
+@Primary
+public class RouteServiceImpl {
 
-    private final LocationPersistancePort locationPort;
-    private final RouteCalculationPort routePort;
+    private final RouteMap routeMap;
 
-    public RouteServiceImpl(LocationPersistancePort locationPort,
-            RouteCalculationPort routePort) {
-        this.locationPort = locationPort;
-        this.routePort = routePort;
+    @Autowired
+    public RouteServiceImpl(RouteMap routeMap) {
+        this.routeMap = routeMap;
     }
 
-    @Override
-    public List<Locations> calculateRoute(UUID startId, UUID endId) {
-        Locations start = locationPort.findById(startId)
-                .orElseThrow(() -> new LocationNotFoundException("Start location not found: " + startId));
-        Locations end = locationPort.findById(endId)
-                .orElseThrow(() -> new LocationNotFoundException("End location not found: " + endId));
-
-        return routePort.findShortestPath(start, end);
+    public Route getRoute(UUID from, UUID to) {
+        return routeMap.getRoute(from, to)
+                .orElseThrow(() -> new RouteNotFoundException("No route found"));
     }
 
-    @Override
-    public double calculateDistance(UUID loc1Id, UUID loc2Id) {
-        Locations loc1 = locationPort.findById(loc1Id)
-                .orElseThrow(() -> new IllegalArgumentException("Location 1 not found"));
-        Locations loc2 = locationPort.findById(loc2Id)
-                .orElseThrow(() -> new IllegalArgumentException("Location 2 not found"));
-
-        return routePort.calculateDistance(loc1, loc2);
+    public Collection<Route> getAllRoutes() {
+        return routeMap.getRoutes();
     }
 }

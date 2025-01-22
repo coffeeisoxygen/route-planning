@@ -1,28 +1,35 @@
 package com.coffeecode.presentation.view.components;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.List;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.MouseEvent;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.awt.event.MouseEvent;
+
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
-import org.jxmapviewer.viewer.*;
+import org.jxmapviewer.viewer.DefaultTileFactory;
+import org.jxmapviewer.viewer.GeoPosition;
+import org.jxmapviewer.viewer.TileFactoryInfo;
+import org.jxmapviewer.viewer.WaypointPainter;
 import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.model.Locations;
 import com.coffeecode.presentation.view.components.map.LocationInfoPanel;
+import com.coffeecode.presentation.view.components.map.LocationWaypoint;
 import com.coffeecode.presentation.view.components.map.LocationWaypointRenderer;
 import com.coffeecode.presentation.view.components.map.MapContextMenu;
 import com.coffeecode.presentation.view.components.map.MapMouseHandler;
-import com.coffeecode.presentation.viewmodel.LocationViewModel;
-import com.coffeecode.presentation.viewmodel.LocationViewModel.ViewModelListener;
-import com.coffeecode.presentation.viewmodel.LocationWaypoint;
+import com.coffeecode.presentation.viewmodel.base.Observer;
+import com.coffeecode.presentation.viewmodel.impl.LocationViewModel;
 
 @Component
-public class MapComponent extends JPanel implements ViewModelListener {
+public class MapComponent extends JPanel implements Observer {
 
     private final JXMapViewer mapViewer;
     private final LocationViewModel viewModel;
@@ -41,7 +48,7 @@ public class MapComponent extends JPanel implements ViewModelListener {
         setupMouseHandlers();
         initializeMap();
 
-        viewModel.addListener(this);
+        viewModel.addObserver(this);
         viewModel.loadLocations();
     }
 
@@ -101,7 +108,11 @@ public class MapComponent extends JPanel implements ViewModelListener {
     @Override
     public void onLocationsChanged(List<Locations> locations) {
         waypoints.clear();
-        locations.forEach(loc -> waypoints.add(new LocationWaypoint(loc)));
+        if (locations != null) {
+            for (Locations loc : locations) {
+                waypoints.add(new LocationWaypoint(loc));
+            }
+        }
         waypointPainter.setWaypoints(waypoints);
         mapViewer.repaint();
     }

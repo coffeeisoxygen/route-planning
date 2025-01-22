@@ -1,23 +1,24 @@
 package com.coffeecode.infrastructure.persistance;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
+import java.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
-
 import com.coffeecode.application.port.output.LocationPersistancePort;
 import com.coffeecode.domain.model.Locations;
+import com.coffeecode.domain.util.DistanceCalculator;
 
 @Repository
 @Primary
 public class InMemoryLocationRepository implements LocationPersistancePort {
 
     private final Map<UUID, Locations> locations = new HashMap<>();
+    private final DistanceCalculator calculator;
+
+    @Autowired
+    public InMemoryLocationRepository(DistanceCalculator calculator) {
+        this.calculator = calculator;
+    }
 
     @Override
     public Locations save(Locations location) {
@@ -56,8 +57,10 @@ public class InMemoryLocationRepository implements LocationPersistancePort {
     public Optional<Locations> findNearestLocation(double latitude, double longitude) {
         return locations.values().stream()
                 .min((loc1, loc2) -> Double.compare(
-                loc1.distanceTo(latitude, longitude),
-                loc2.distanceTo(latitude, longitude)));
+                calculator.calculateDistance(latitude, longitude,
+                        loc1.latitude(), loc1.longitude()),
+                calculator.calculateDistance(latitude, longitude,
+                        loc2.latitude(), loc2.longitude())
+        ));
     }
-
 }

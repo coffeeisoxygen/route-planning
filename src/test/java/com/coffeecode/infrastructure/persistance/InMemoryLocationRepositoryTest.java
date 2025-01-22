@@ -1,59 +1,104 @@
 package com.coffeecode.infrastructure.persistance;
 
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.coffeecode.domain.model.Locations;
+import com.coffeecode.domain.util.DistanceCalculator;
 
+@ExtendWith(MockitoExtension.class)
 class InMemoryLocationRepositoryTest {
 
+    @Mock
+    private DistanceCalculator calculator;
     private InMemoryLocationRepository repository;
-    private Locations testLocation;
+    private Locations bandung;
+    private Locations jakarta;
 
     @BeforeEach
     void setUp() {
-        repository = new InMemoryLocationRepository();
-        testLocation = new Locations("Test Location", 0, 0);
+        repository = new InMemoryLocationRepository(calculator);
+        bandung = new Locations("Bandung", -6.914744, 107.609810);
+        jakarta = new Locations("Jakarta", -6.200000, 106.816666);
     }
 
     @Test
-    void shouldSaveAndRetrieveLocation() {
-        Locations saved = repository.save(testLocation);
-        assertEquals(testLocation, saved);
+    void save_shouldStoreAndReturnLocation() {
+        Locations saved = repository.save(bandung);
 
-        var found = repository.findById(testLocation.id());
+        assertEquals(bandung, saved);
+        assertTrue(repository.exists(bandung.id()));
+    }
+
+    @Test
+    void findById_whenExists_shouldReturnLocation() {
+        repository.save(bandung);
+
+        Optional<Locations> found = repository.findById(bandung.id());
+
         assertTrue(found.isPresent());
-        assertEquals(testLocation, found.get());
+        assertEquals(bandung, found.get());
     }
 
     @Test
-    void shouldFindAllLocations() {
-        Locations loc1 = new Locations("Location 1", 0, 0);
-        Locations loc2 = new Locations("Location 2", 1, 1);
+    void findByName_whenExists_shouldReturnLocation() {
+        repository.save(bandung);
 
-        repository.save(loc1);
-        repository.save(loc2);
+        Optional<Locations> found = repository.findByName("Bandung");
+
+        assertTrue(found.isPresent());
+        assertEquals(bandung, found.get());
+    }
+
+    @Test
+    void findAll_shouldReturnAllLocations() {
+        repository.save(bandung);
+        repository.save(jakarta);
 
         List<Locations> all = repository.findAll();
+
         assertEquals(2, all.size());
-        assertTrue(all.contains(loc1));
-        assertTrue(all.contains(loc2));
+        assertTrue(all.contains(bandung));
+        assertTrue(all.contains(jakarta));
     }
 
     @Test
-    void shouldFindNearestLocation() {
-        Locations near = new Locations("Near", 0, 0);
-        Locations far = new Locations("Far", 10, 10);
+    void delete_shouldRemoveLocation() {
+        repository.save(bandung);
+        repository.delete(bandung.id());
 
-        repository.save(near);
-        repository.save(far);
+        assertFalse(repository.exists(bandung.id()));
+        assertTrue(repository.findById(bandung.id()).isEmpty());
+    }
 
-        var nearest = repository.findNearestLocation(0.1, 0.1);
+    @Test
+    void findNearestLocation_shouldReturnClosestLocation() {
+        repository.save(bandung);
+        repository.save(jakarta);
+
+        when(calculator.calculateDistance(-6.3, 106.9, jakarta.latitude(), jakarta.longitude()))
+                .thenReturn(50.0);
+        when(calculator.calculateDistance(-6.3, 106.9, bandung.latitude(), bandung.longitude()))
+                .thenReturn(100.0);
+
+        Optional<Locations> nearest = repository.findNearestLocation(-6.3, 106.9);
+
         assertTrue(nearest.isPresent());
-        assertEquals(near, nearest.get());
+        assertEquals(jakarta, nearest.get());
+    }
+
+    @Test
+    void findNearestLocation_whenEmpty_shouldReturnEmpty() {
+        Optional<Locations> nearest = repository.findNearestLocation(0, 0);
+        assertTrue(nearest.isEmpty());
     }
 }
