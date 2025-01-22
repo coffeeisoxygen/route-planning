@@ -5,11 +5,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.algorithm.api.AllPairsShortestPath;
+import com.coffeecode.domain.model.Locations;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 
@@ -42,7 +45,7 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
 
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
-        // Initialize distance and next matrices
+        this.source = source; // Track source for getDistances()
         initializeMatrices(map);
 
         // Get all vertices
@@ -69,31 +72,35 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
     }
 
     private void initializeMatrices(RouteMap map) {
+        // Clear existing data
         distances = new HashMap<>();
         next = new HashMap<>();
-
-        // Initialize with infinity
-        for (var loc : map.getLocations()) {
-            distances.put(loc.id(), new HashMap<>());
-            next.put(loc.id(), new HashMap<>());
-            for (var otherLoc : map.getLocations()) {
-                distances.get(loc.id()).put(otherLoc.id(), Double.POSITIVE_INFINITY);
-                next.get(loc.id()).put(otherLoc.id(), null);
-            }
-        }
-
+        
+        // Get unique locations
+        Set<UUID> vertices = map.getLocations().stream()
+            .map(Locations::id)
+            .collect(Collectors.toSet());
+            
+        // Initialize matrices
+        vertices.forEach(id -> {
+            distances.put(id, new HashMap<>());
+            next.put(id, new HashMap<>());
+            
+            vertices.forEach(otherId -> {
+                distances.get(id).put(otherId, Double.POSITIVE_INFINITY);
+                next.get(id).put(otherId, null);
+            });
+            
+            // Set self-distance
+            distances.get(id).put(id, 0.0);
+            next.get(id).put(id, id);
+        });
+        
         // Set direct routes
-        for (Route route : map.getRoutes()) {
+        map.getRoutes().forEach(route -> {
             distances.get(route.sourceId()).put(route.targetId(), route.distance());
             next.get(route.sourceId()).put(route.targetId(), route.targetId());
-        }
-
-        // Set self-distances to 0
-        for (Map.Entry<UUID, Map<UUID, Double>> entry : distances.entrySet()) {
-            UUID id = entry.getKey();
-            entry.getValue().put(id, 0.0);
-            next.get(id).put(id, id);
-        }
+        });
     }
 
     private List<Route> reconstructPath(RouteMap map, UUID source, UUID target) {
