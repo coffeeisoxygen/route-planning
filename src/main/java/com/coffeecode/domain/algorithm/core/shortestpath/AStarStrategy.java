@@ -3,26 +3,37 @@ package com.coffeecode.domain.algorithm.core.shortestpath;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.coffeecode.domain.algorithm.api.PathFinding;
+import com.coffeecode.domain.algorithm.api.SingleSourceShortestPath;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 
 @Component
-public class AStarStrategy implements PathFinding {
+public class AStarStrategy implements SingleSourceShortestPath {
+
+    private UUID source;
+    private Map<UUID, Double> gScore;
+    private Map<UUID, UUID> predecessors;
+    private Map<UUID, Route> pathParent;
+
+    public UUID getSource() {
+        return source;
+    }
 
     private static class Node implements Comparable<Node> {
 
         UUID id;
-        double gScore; // Cost from start
-        double fScore; // Estimated total cost
+        double gScore;
+        double fScore;
 
         Node(UUID id, double gScore, double fScore) {
             this.id = id;
@@ -51,17 +62,27 @@ public class AStarStrategy implements PathFinding {
         public int hashCode() {
             return Objects.hash(id);
         }
+
+    }
+
+    @Override
+    public void initialize(UUID source) {
+        this.source = source;
+        this.gScore = new HashMap<>();
+        this.gScore.put(source, 0.0); // Initialize gScore for the source node
+        this.predecessors = new HashMap<>();
+        this.pathParent = new HashMap<>();
     }
 
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
+        initialize(source);
         PriorityQueue<Node> openSet = new PriorityQueue<>();
-        Map<UUID, Double> gScore = new HashMap<>();
-        Map<UUID, Route> pathParent = new HashMap<>();
+        Set<UUID> closedSet = new HashSet<>();
 
-        // Initialize with start node
         openSet.offer(new Node(source, 0, heuristic(map, source, target)));
         gScore.put(source, 0.0);
+        predecessors.put(source, source);
 
         while (!openSet.isEmpty()) {
             Node current = openSet.poll();
@@ -70,25 +91,30 @@ public class AStarStrategy implements PathFinding {
                 return reconstructPath(pathParent, source, target);
             }
 
-            for (Route route : map.getRoutes()) {
-                if (!route.sourceId().equals(current.id)) {
-                    continue;
-                }
-
-                double tentativeGScore = gScore.get(current.id) + route.distance();
-                UUID neighbor = route.targetId();
-
-                gScore.computeIfAbsent(neighbor, k -> Double.MAX_VALUE);
-                if (tentativeGScore < gScore.get(neighbor)) {
-                    pathParent.put(neighbor, route);
-                    gScore.put(neighbor, tentativeGScore);
-                    double fScore = tentativeGScore + heuristic(map, neighbor, target);
-                    openSet.offer(new Node(neighbor, tentativeGScore, fScore));
-                }
-            }
+            closedSet.add(current.id);
+            processNeighbors(map, openSet, closedSet, current, target);
         }
 
         return Collections.emptyList();
+    }
+
+    private void processNeighbors(RouteMap map, PriorityQueue<Node> openSet, Set<UUID> closedSet, Node current, UUID target) {
+        for (Route route : map.getRoutes()) {
+            if (route.sourceId().equals(current.id)) {
+                UUID neighbor = route.targetId();
+                if (!closedSet.contains(neighbor)) {
+                    double tentativeGScore = gScore.get(current.id) + route.distance();
+
+                    if (!gScore.containsKey(neighbor) || tentativeGScore < gScore.get(neighbor)) {
+                        gScore.put(neighbor, tentativeGScore);
+                        predecessors.put(neighbor, current.id);
+                        pathParent.put(neighbor, route);
+                        double fScore = tentativeGScore + heuristic(map, neighbor, target);
+                        openSet.offer(new Node(neighbor, tentativeGScore, fScore));
+                    }
+                }
+            }
+        }
     }
 
     private double heuristic(RouteMap map, UUID current, UUID target) {
@@ -101,11 +127,29 @@ public class AStarStrategy implements PathFinding {
 
         while (!current.equals(source)) {
             Route route = pathParent.get(current);
+            if (route == null) {
+                break;
+            }
             path.add(0, route);
             current = route.sourceId();
         }
 
         return path;
+    }
+
+    @Override
+    public Map<UUID, UUID> getPredecessors() {
+        return Collections.unmodifiableMap(predecessors);
+    }
+
+    @Override
+    public Map<UUID, Double> getDistances() {
+        return Collections.unmodifiableMap(gScore);
+    }
+
+    @Override
+    public double getPathCost(UUID target) {
+        return gScore.getOrDefault(target, Double.POSITIVE_INFINITY);
     }
 
     @Override

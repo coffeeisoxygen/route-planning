@@ -8,12 +8,18 @@ public record Route(
         double distance,
         RouteType type) {
 
+    @Override
+    public String toString() {
+        return String.format("Route{sourceId=%s, targetId=%s, distance=%.2f, type=%s}",
+                sourceId, targetId, distance, type);
+    }
+
     public enum RouteType {
         DIRECT, // Direct distance
         CALCULATED  // Algorithm calculated
     }
 
-    public Route {
+    public Route    {
         if (distance < 0) {
             throw new IllegalArgumentException("Distance cannot be negative");
         }

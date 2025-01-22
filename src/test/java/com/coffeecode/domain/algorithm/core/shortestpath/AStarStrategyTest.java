@@ -1,0 +1,85 @@
+package com.coffeecode.domain.algorithm.core.shortestpath;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.coffeecode.domain.model.Locations;
+import com.coffeecode.domain.model.Route;
+
+class AStarStrategyTest extends ShortestPathBaseTest {
+
+    private AStarStrategy aStar;
+
+    @BeforeEach
+    @Override
+    protected void setUp() {
+        super.setUp();
+        aStar = new AStarStrategy();
+    }
+
+    @Test
+    void findPath_shouldFindPath() {
+        Locations start = testLocations.get("A");
+        Locations end = testLocations.get("I");
+
+        System.out.println("Finding path from " + start.id() + " to " + end.id());
+        List<Route> path = aStar.findPath(routeMap, start.id(), end.id());
+        printRoutes(path);
+
+        assertFalse(path.isEmpty());
+        assertTrue(isPathConnected(path));
+        assertEquals(start.id(), path.get(0).sourceId());
+        assertEquals(end.id(), path.get(path.size() - 1).targetId());
+    }
+
+    @Test
+    void findPath_shouldBeOptimal() {
+        UUID startId = testLocations.get("A").id();
+        UUID endId = testLocations.get("I").id();
+
+        System.out.println("Comparing A* and Dijkstra paths from " + startId + " to " + endId);
+        List<Route> aStarPath = aStar.findPath(routeMap, startId, endId);
+        List<Route> dijkstraPath = new DijkstraStrategy().findPath(routeMap, startId, endId);
+
+        double aStarCost = calculateTotalDistance(aStarPath);
+        double dijkstraCost = calculateTotalDistance(dijkstraPath);
+
+        System.out.println("A* cost: " + aStarCost + ", Dijkstra cost: " + dijkstraCost);
+        assertTrue(aStarCost <= dijkstraCost * 1.001); // Within 0.1% of optimal
+    }
+
+    @Test
+    void findPath_shouldReturnEmpty_whenNoPath() {
+        Locations start = testLocations.get("A");
+        assertNotNull(start, "Start location not found");
+
+        // Create a valid but disconnected location
+        Locations disconnected = new Locations("DISCONNECTED", 45.0, 45.0);
+        routeMap.addLocation(disconnected);
+
+        List<Route> path = aStar.findPath(routeMap, start.id(), disconnected.id());
+        assertTrue(path.isEmpty(), "Path should be empty for disconnected location");
+    }
+
+    @Test
+    void getPathCost_shouldMatchPathDistance() {
+        Locations start = testLocations.get("A");
+        Locations end = testLocations.get("I");
+        assertNotNull(start, "Start location not found");
+        assertNotNull(end, "End location not found");
+
+        List<Route> path = aStar.findPath(routeMap, start.id(), end.id());
+        double expectedCost = calculateTotalDistance(path);
+        double actualCost = aStar.getPathCost(end.id());
+
+        assertEquals(expectedCost, actualCost, 0.001,
+                String.format("Path cost mismatch: expected %.2f but got %.2f", expectedCost, actualCost));
+    }
+}
