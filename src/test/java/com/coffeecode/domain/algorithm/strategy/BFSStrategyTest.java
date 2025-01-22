@@ -11,41 +11,35 @@ import org.junit.jupiter.api.Test;
 
 import com.coffeecode.domain.model.Locations;
 import com.coffeecode.domain.model.Route;
-import com.coffeecode.domain.model.RouteMap;
-import com.coffeecode.infrastructure.distance.GeoToolsCalculator;
 
-class BFSStrategyTest {
+class BFSStrategyTest extends BasePathFindingTest {
 
     private BFSStrategy bfs;
-    private RouteMap routeMap;
-    private Locations loc1, loc2, loc3;
 
     @BeforeEach
     void setUp() {
+        super.setUp();
         bfs = new BFSStrategy();
-        routeMap = new RouteMap(new GeoToolsCalculator());
-
-        loc1 = new Locations("A", 0, 0);
-        loc2 = new Locations("B", 1, 1);
-        loc3 = new Locations("C", 2, 2);
-
-        routeMap.addLocation(loc1);
-        routeMap.addLocation(loc2);
-        routeMap.addLocation(loc3);
     }
 
     @Test
-    void findPath_shouldReturnPath_whenExists() {
-        List<Route> path = bfs.findPath(routeMap, loc1.id(), loc3.id());
+    void findPath_shouldFindPath() {
+        Locations start = testLocations.get("A");
+        Locations end = testLocations.get("I");
+
+        List<Route> path = bfs.findPath(routeMap, start.id(), end.id());
+        printRoutes(path);
 
         assertFalse(path.isEmpty());
-        assertEquals(loc1.id(), path.get(0).sourceId());
-        assertEquals(loc3.id(), path.get(path.size() - 1).targetId());
+        assertEquals(start.id(), path.get(0).sourceId());
+        assertEquals(end.id(), path.get(path.size() - 1).targetId());
     }
 
     @Test
     void findPath_shouldReturnEmpty_whenNoPath() {
-        List<Route> path = bfs.findPath(routeMap, loc1.id(), UUID.randomUUID());
+        List<Route> path = bfs.findPath(routeMap,
+                testLocations.get("A").id(),
+                UUID.randomUUID());
         assertTrue(path.isEmpty());
     }
 }
