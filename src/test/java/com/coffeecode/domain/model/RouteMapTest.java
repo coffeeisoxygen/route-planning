@@ -1,22 +1,12 @@
 package com.coffeecode.domain.model;
 
-import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
-import org.mockito.Mock;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.coffeecode.domain.util.DistanceCalculator;
 import com.coffeecode.infrastructure.distance.GeoToolsCalculator;
 
 public class RouteMapTest {
@@ -58,5 +48,18 @@ public class RouteMapTest {
         // Then
         assertEquals(1, routeMap.getRoutes().size());
         assertTrue(routeMap.hasRoute(start.id(), end.id()));
+    }
+
+    @Test
+    void getRoutesFrom_shouldReturnCorrectRoutes() {
+        Locations start = new Locations("A", 0, 0);
+        Locations end = new Locations("B", 1, 1);
+
+        routeMap.addLocation(start);
+        routeMap.addLocation(end);
+        routeMap.addBidirectionalRoute(start.id(), end.id());
+
+        List<Route> routes = routeMap.getRoutesFrom(start.id());
+        assertEquals(1, routes.size());
     }
 }

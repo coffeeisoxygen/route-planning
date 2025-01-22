@@ -3,6 +3,7 @@ package com.coffeecode.domain.model;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,11 +27,36 @@ public class RouteMap {
         this.routes = new HashMap<>();
     }
 
-    public Optional<Route> getRoute(UUID source, UUID target) {
+    // Add helper methods for algorithms
+    public List<Route> getRoutesFrom(UUID source) {
+        return routes.getOrDefault(source, Collections.emptyMap())
+                .values()
+                .stream()
+                .toList();
+    }
 
+    public List<Route> getNeighbors(UUID locationId) {
+        return routes.getOrDefault(locationId, Collections.emptyMap())
+                .values()
+                .stream()
+                .toList();
+    }
+
+    public void addRoute(UUID sourceId, UUID targetId, Route.RouteType type) {
+        double distance = calculateDirectDistance(sourceId, targetId);
+        Route route = new Route(sourceId, targetId, distance, type);
+        routes.computeIfAbsent(sourceId, k -> new HashMap<>())
+                .put(targetId, route);
+    }
+
+    public void addBidirectionalRoute(UUID sourceId, UUID targetId) {
+        addRoute(sourceId, targetId, Route.RouteType.DIRECT);
+        addRoute(targetId, sourceId, Route.RouteType.DIRECT);
+    }
+
+    public Optional<Route> getRoute(UUID source, UUID target) {
         return Optional.ofNullable(routes.get(source))
                 .map(m -> m.get(target));
-
     }
 
     public void addRoute(UUID sourceId, UUID targetId) {
