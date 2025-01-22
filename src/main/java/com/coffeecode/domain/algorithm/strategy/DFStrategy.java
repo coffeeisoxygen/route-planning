@@ -1,13 +1,14 @@
 package com.coffeecode.domain.algorithm.strategy;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
@@ -21,7 +22,7 @@ public class DFStrategy implements PathFinding {
 
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
-        Stack<UUID> stack = new Stack<>();
+        Deque<UUID> stack = new ArrayDeque<>();
         Map<UUID, Route> pathParent = new HashMap<>();
         Set<UUID> visited = new HashSet<>();
 
@@ -41,6 +42,11 @@ public class DFStrategy implements PathFinding {
                     visited.add(route.targetId());
                     pathParent.put(route.targetId(), route);
                 }
+                if (route.targetId().equals(current) && !visited.contains(route.sourceId())) {
+                    stack.push(route.sourceId());
+                    visited.add(route.sourceId());
+                    pathParent.put(route.sourceId(), route);
+                }
             }
         }
 
@@ -54,7 +60,11 @@ public class DFStrategy implements PathFinding {
         while (!current.equals(source)) {
             Route route = pathParent.get(current);
             path.add(0, route);
-            current = route.sourceId();
+            if (route.sourceId().equals(current)) {
+                current = route.targetId();
+            } else {
+                current = route.sourceId();
+            }
         }
 
         return path;
