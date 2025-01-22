@@ -99,21 +99,29 @@ public class AStarStrategy implements SingleSourceShortestPath {
     }
 
     private void processNeighbors(RouteMap map, PriorityQueue<Node> openSet, Set<UUID> closedSet, Node current, UUID target) {
+        boolean neighborFound = false;
         for (Route route : map.getRoutes()) {
             if (route.sourceId().equals(current.id)) {
                 UUID neighbor = route.targetId();
                 if (!closedSet.contains(neighbor)) {
                     double tentativeGScore = gScore.get(current.id) + route.distance();
-
+    
                     if (!gScore.containsKey(neighbor) || tentativeGScore < gScore.get(neighbor)) {
                         gScore.put(neighbor, tentativeGScore);
                         predecessors.put(neighbor, current.id);
                         pathParent.put(neighbor, route);
                         double fScore = tentativeGScore + heuristic(map, neighbor, target);
-                        openSet.offer(new Node(neighbor, tentativeGScore, fScore));
+                        Node neighborNode = new Node(neighbor, tentativeGScore, fScore);
+                        if (!openSet.contains(neighborNode)) {
+                            openSet.offer(neighborNode);
+                            neighborFound = true;
+                        }
                     }
                 }
             }
+        }
+        if (!neighborFound) {
+            closedSet.add(current.id);
         }
     }
 

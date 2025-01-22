@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 
 import com.coffeecode.domain.model.Locations;
 import com.coffeecode.domain.model.Route;
+import com.coffeecode.domain.model.RouteMap;
+import com.coffeecode.infrastructure.distance.GeoToolsCalculator;
 
 class AStarStrategyTest extends ShortestPathBaseTest {
 
@@ -57,15 +59,19 @@ class AStarStrategyTest extends ShortestPathBaseTest {
 
     @Test
     void findPath_shouldReturnEmpty_whenNoPath() {
-        Locations start = testLocations.get("A");
-        assertNotNull(start, "Start location not found");
+        // Create new empty route map for this test
+        RouteMap isolatedMap = new RouteMap(new GeoToolsCalculator());
 
-        // Create a valid but disconnected location
-        Locations disconnected = new Locations("DISCONNECTED", 45.0, 45.0);
-        routeMap.addLocation(disconnected);
+        // Add two disconnected locations
+        Locations start = new Locations("START", 0.0, 0.0);
+        Locations end = new Locations("END", 1.0, 1.0);
 
-        List<Route> path = aStar.findPath(routeMap, start.id(), disconnected.id());
-        assertTrue(path.isEmpty(), "Path should be empty for disconnected location");
+        isolatedMap.addLocation(start);
+        isolatedMap.addLocation(end);
+        // No routes added = disconnected
+
+        List<Route> path = aStar.findPath(isolatedMap, start.id(), end.id());
+        assertTrue(path.isEmpty(), "Path should be empty when no routes exist between locations");
     }
 
     @Test

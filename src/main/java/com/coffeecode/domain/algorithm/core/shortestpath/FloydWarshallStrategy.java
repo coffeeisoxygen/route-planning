@@ -76,6 +76,10 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
         for (var loc : map.getLocations()) {
             distances.put(loc.id(), new HashMap<>());
             next.put(loc.id(), new HashMap<>());
+            for (var otherLoc : map.getLocations()) {
+                distances.get(loc.id()).put(otherLoc.id(), Double.POSITIVE_INFINITY);
+                next.get(loc.id()).put(otherLoc.id(), null);
+            }
         }
 
         // Set direct routes
