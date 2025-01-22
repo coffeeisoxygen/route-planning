@@ -1,5 +1,9 @@
 package com.coffeecode;
 
+import java.util.Collection;
+
+import javax.swing.SwingUtilities;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -10,11 +14,6 @@ import com.coffeecode.application.service.RouteServiceImpl;
 import com.coffeecode.config.AppConfig;
 import com.coffeecode.domain.model.Locations;
 import com.coffeecode.domain.model.Route;
-import com.coffeecode.presentation.view.MainFrame;
-
-import java.util.Collection;
-
-import javax.swing.SwingUtilities;
 
 public class App {
 
@@ -30,8 +29,6 @@ public class App {
             runSimulation(context);
 
             SwingUtilities.invokeLater(() -> {
-                MainFrame mainFrame = context.getBean(MainFrame.class);
-                mainFrame.setVisible(true);
                 logger.info("GUI initialized successfully");
             });
 
