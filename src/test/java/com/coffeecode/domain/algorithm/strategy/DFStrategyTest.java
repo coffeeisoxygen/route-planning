@@ -17,7 +17,7 @@ class DFStrategyTest extends BasePathFindingTest {
 
     @BeforeEach
     @Override
-    void setUp() {
+    protected void setUp() {
         super.setUp();
         dfs = new DFStrategy();
     }

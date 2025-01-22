@@ -18,7 +18,8 @@ class FloydWarshallStrategyTest extends ShortestPathBaseTest {
     private FloydWarshallStrategy floydWarshall;
 
     @BeforeEach
-    void setUp() {
+    @Override
+    protected void setUp() {
         floydWarshall = new FloydWarshallStrategy();
     }
 
@@ -29,6 +30,8 @@ class FloydWarshallStrategyTest extends ShortestPathBaseTest {
 
         List<Route> path = floydWarshall.findPath(routeMap, start.id(), end.id());
         printRoutes(path);
+
+        System.out.println("Path: " + path);
 
         assertFalse(path.isEmpty());
         assertTrue(isPathConnected(path));
@@ -44,6 +47,8 @@ class FloydWarshallStrategyTest extends ShortestPathBaseTest {
         floydWarshall.findPath(routeMap, start.id(), end.id());
         Map<UUID, Map<UUID, Double>> allDistances = floydWarshall.getAllDistances();
 
+        System.out.println("All Distances: " + allDistances);
+
         assertEquals(testLocations.size(), allDistances.size());
         for (Map<UUID, Double> distances : allDistances.values()) {
             assertEquals(testLocations.size(), distances.size());
@@ -58,6 +63,9 @@ class FloydWarshallStrategyTest extends ShortestPathBaseTest {
         List<Route> path = floydWarshall.findPath(routeMap, start.id(), end.id());
         double expectedCost = calculateTotalDistance(path);
         double actualCost = floydWarshall.getPathCost(end.id());
+
+        System.out.println("Expected Cost: " + expectedCost);
+        System.out.println("Actual Cost: " + actualCost);
 
         assertEquals(expectedCost, actualCost, 0.001);
     }

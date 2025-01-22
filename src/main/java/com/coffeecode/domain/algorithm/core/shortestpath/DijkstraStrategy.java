@@ -19,11 +19,16 @@ import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 
 @Component
-public class DijkstraStrategy implements SingleSourceShortestPath {
+public class DijkstraStrategy implements SingleSourceShortestPath, ShortestPathFinding {
 
+    private UUID source;
     private Map<UUID, Double> distances;
     private Map<UUID, UUID> predecessors;
     private Map<UUID, Route> pathParent;
+
+    public UUID getSource() {
+        return source;
+    }
 
     private static class Node implements Comparable<Node> {
 
@@ -49,21 +54,27 @@ public class DijkstraStrategy implements SingleSourceShortestPath {
                 return false;
             }
             Node node = (Node) obj;
-            return Objects.equals(id, node.id);
+            return Double.compare(node.distance, distance) == 0 && id.equals(node.id);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(id);
+            return Objects.hash(id, distance);
         }
     }
 
     @Override
+    public void initialize(UUID source) {
+        this.source = source;
+        this.distances = new HashMap<>();
+        this.predecessors = new HashMap<>();
+        this.pathParent = new HashMap<>();
+    }
+
+    @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
+        initialize(source);
         PriorityQueue<Node> queue = new PriorityQueue<>();
-        distances = new HashMap<>();
-        pathParent = new HashMap<>();
-        predecessors = new HashMap<>();
         Set<UUID> visited = new HashSet<>();
 
         queue.offer(new Node(source, 0));
@@ -87,8 +98,8 @@ public class DijkstraStrategy implements SingleSourceShortestPath {
                     continue;
                 }
 
-                double newDistance = distances.get(current.id) + route.distance();
                 UUID neighbor = route.targetId();
+                double newDistance = distances.get(current.id) + route.distance();
 
                 if (!distances.containsKey(neighbor) || newDistance < distances.get(neighbor)) {
                     distances.put(neighbor, newDistance);
@@ -108,6 +119,9 @@ public class DijkstraStrategy implements SingleSourceShortestPath {
 
         while (!current.equals(source)) {
             Route route = pathParent.get(current);
+            if (route == null) {
+                break;
+            }
             path.add(0, route);
             current = route.sourceId();
         }
@@ -116,13 +130,13 @@ public class DijkstraStrategy implements SingleSourceShortestPath {
     }
 
     @Override
-    public Map<UUID, Double> getDistances() {
-        return Collections.unmodifiableMap(distances);
+    public Map<UUID, UUID> getPredecessors() {
+        return Collections.unmodifiableMap(predecessors);
     }
 
     @Override
-    public Map<UUID, UUID> getPath() {
-        return Collections.unmodifiableMap(predecessors);
+    public Map<UUID, Double> getDistances() {
+        return Collections.unmodifiableMap(distances);
     }
 
     @Override

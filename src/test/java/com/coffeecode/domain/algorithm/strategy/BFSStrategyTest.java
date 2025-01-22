@@ -18,7 +18,8 @@ class BFSStrategyTest extends BasePathFindingTest {
     private BFSStrategy bfs;
 
     @BeforeEach
-    void setUp() {
+    @Override
+    protected void setUp() {
         super.setUp();
         bfs = new BFSStrategy();
     }

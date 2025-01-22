@@ -20,6 +20,7 @@ public abstract class BasePathFindingTest {
     protected Map<UUID, String> idToName;
 
     @BeforeEach
+    protected
     void setUp() {
         routeMap = new RouteMap(new GeoToolsCalculator());
         testLocations = new HashMap<>();
