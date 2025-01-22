@@ -13,7 +13,7 @@ public record Route(
         CALCULATED  // Algorithm calculated
     }
 
-    public Route    {
+    public Route {
         if (distance < 0) {
             throw new IllegalArgumentException("Distance cannot be negative");
         }

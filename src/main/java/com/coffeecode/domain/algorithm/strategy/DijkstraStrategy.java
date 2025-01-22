@@ -84,12 +84,7 @@ public class DijkstraStrategy implements PathFinding {
                 double newDistance = distances.get(current.id) + route.distance();
                 UUID neighbor = route.targetId();
 
-                distances.computeIfAbsent(neighbor, k -> {
-                    pathParent.put(neighbor, route);
-                    queue.offer(new Node(neighbor, newDistance));
-                    return newDistance;
-                });
-                if (newDistance < distances.get(neighbor)) {
+                if (!distances.containsKey(neighbor) || newDistance < distances.get(neighbor)) {
                     distances.put(neighbor, newDistance);
                     pathParent.put(neighbor, route);
                     queue.offer(new Node(neighbor, newDistance));
