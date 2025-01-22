@@ -1,4 +1,4 @@
-package com.coffeecode.domain.algorithm.pathfinding;
+package com.coffeecode.domain.algorithm.core.pathfinding;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.coffeecode.domain.algorithm.component.PathFinding;
+import com.coffeecode.domain.algorithm.api.PathFinding;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 

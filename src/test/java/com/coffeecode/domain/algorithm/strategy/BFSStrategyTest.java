@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.coffeecode.domain.algorithm.pathfinding.BFSStrategy;
+import com.coffeecode.domain.algorithm.core.pathfinding.BFSStrategy;
 import com.coffeecode.domain.model.Locations;
 import com.coffeecode.domain.model.Route;
 

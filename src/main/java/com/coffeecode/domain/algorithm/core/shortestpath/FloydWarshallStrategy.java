@@ -1,4 +1,4 @@
-package com.coffeecode.domain.algorithm.shortestpath;
+package com.coffeecode.domain.algorithm.core.shortestpath;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,15 +9,36 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.coffeecode.domain.algorithm.component.PathFinding;
+import com.coffeecode.domain.algorithm.api.AllPairsShortestPath;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 
 @Component
-public class FloydWarshallStrategy implements PathFinding {
+public class FloydWarshallStrategy implements AllPairsShortestPath {
 
     private Map<UUID, Map<UUID, Double>> distances;
     private Map<UUID, Map<UUID, UUID>> next;
+    private UUID source;
+
+    @Override
+    public Map<UUID, Map<UUID, Double>> getAllDistances() {
+        return Collections.unmodifiableMap(distances);
+    }
+
+    @Override
+    public Map<UUID, Map<UUID, UUID>> getNextHops() {
+        return Collections.unmodifiableMap(next);
+    }
+
+    @Override
+    public Map<UUID, Double> getDistances() {
+        return Collections.unmodifiableMap(distances.get(source));
+    }
+
+    @Override
+    public double getPathCost(UUID target) {
+        return distances.get(source).getOrDefault(target, Double.POSITIVE_INFINITY);
+    }
 
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {

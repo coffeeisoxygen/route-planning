@@ -3,7 +3,7 @@ package com.coffeecode.domain.algorithm.result;
 import java.util.Collections;
 import java.util.List;
 
-import com.coffeecode.domain.algorithm.component.PathStatistics;
+import com.coffeecode.domain.algorithm.api.PathStatistics;
 import com.coffeecode.domain.model.Route;
 
 public record PathResult(

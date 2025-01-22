@@ -1,4 +1,4 @@
-package com.coffeecode.domain.algorithm.component;
+package com.coffeecode.domain.algorithm.api;
 
 import java.util.List;
 import java.util.UUID;
