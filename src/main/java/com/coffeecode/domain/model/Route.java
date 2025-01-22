@@ -11,7 +11,7 @@ public record Route(
     @Override
     public String toString() {
         return String.format("Route{sourceId=%s, targetId=%s, distance=%.2f, type=%s}",
-                sourceId, targetId, distance, type);
+                sourceId.toString().substring(0, 8), targetId.toString().substring(0, 8), distance, type);
     }
 
     public enum RouteType {

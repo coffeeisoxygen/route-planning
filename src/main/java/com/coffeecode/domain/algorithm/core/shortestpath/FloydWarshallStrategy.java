@@ -89,8 +89,9 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
         }
 
         // Set self-distances to 0
-        for (UUID id : distances.keySet()) {
-            distances.get(id).put(id, 0.0);
+        for (Map.Entry<UUID, Map<UUID, Double>> entry : distances.entrySet()) {
+            UUID id = entry.getKey();
+            entry.getValue().put(id, 0.0);
             next.get(id).put(id, id);
         }
     }

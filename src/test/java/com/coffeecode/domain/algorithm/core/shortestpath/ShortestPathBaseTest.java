@@ -1,5 +1,6 @@
 package com.coffeecode.domain.algorithm.core.shortestpath;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -9,9 +10,38 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.coffeecode.domain.algorithm.strategy.BasePathFindingTest;
+import com.coffeecode.domain.model.Locations;
 import com.coffeecode.domain.model.Route;
 
 public abstract class ShortestPathBaseTest extends BasePathFindingTest {
+
+    @Override
+    protected void setUp() {
+        super.setUp();
+        testLocations = new HashMap<>();
+        setupTestLocations();
+    }
+
+    private void setupTestLocations() {
+        // Create test grid
+        createLocation("A", 0.0, 0.0);
+        createLocation("B", 1.0, 1.0);
+        createLocation("C", 2.0, 2.0);
+        createLocation("D", 0.0, 3.0);
+        createLocation("E", 1.0, 3.0);
+        createLocation("F", 2.0, 3.0);
+        createLocation("G", 0.0, 6.0);
+        createLocation("H", 1.0, 6.0);
+        createLocation("I", 2.0, 6.0);
+
+        // Add to route map
+        testLocations.values().forEach(routeMap::addLocation);
+    }
+
+    private void createLocation(String name, double lat, double lon) {
+        Locations location = new Locations(name, lat, lon);
+        testLocations.put(name, location);
+    }
 
     protected boolean isShortestPath(List<Route> path, UUID source, UUID target) {
         if (path.isEmpty()) {
