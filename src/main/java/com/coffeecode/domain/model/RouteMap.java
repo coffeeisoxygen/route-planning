@@ -73,7 +73,6 @@ public class RouteMap {
 
     public void addLocation(Locations location) {
         locations.put(location.id(), location);
-        // Remove auto-connections
     }
 
     public Collection<Locations> getLocations() {
