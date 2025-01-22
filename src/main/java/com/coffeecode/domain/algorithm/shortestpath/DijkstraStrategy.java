@@ -1,4 +1,4 @@
-package com.coffeecode.domain.algorithm.strategy;
+package com.coffeecode.domain.algorithm.shortestpath;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,12 +13,16 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.coffeecode.domain.algorithm.component.PathFinding;
+import com.coffeecode.domain.algorithm.component.ShortestPathFinding;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 
 @Component
-public class DijkstraStrategy implements PathFinding {
+public class DijkstraStrategy implements ShortestPathFinding {
+
+    private Map<UUID, Double> distances;
+    private Map<UUID, UUID> predecessors;
+    private Map<UUID, Route> pathParent;
 
     private static class Node implements Comparable<Node> {
 
@@ -56,13 +60,14 @@ public class DijkstraStrategy implements PathFinding {
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
         PriorityQueue<Node> queue = new PriorityQueue<>();
-        Map<UUID, Double> distances = new HashMap<>();
-        Map<UUID, Route> pathParent = new HashMap<>();
+        distances = new HashMap<>();
+        pathParent = new HashMap<>();
+        predecessors = new HashMap<>();
         Set<UUID> visited = new HashSet<>();
 
-        // Initialize distances
         queue.offer(new Node(source, 0));
         distances.put(source, 0.0);
+        predecessors.put(source, source);
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
@@ -86,6 +91,7 @@ public class DijkstraStrategy implements PathFinding {
 
                 if (!distances.containsKey(neighbor) || newDistance < distances.get(neighbor)) {
                     distances.put(neighbor, newDistance);
+                    predecessors.put(neighbor, current.id);
                     pathParent.put(neighbor, route);
                     queue.offer(new Node(neighbor, newDistance));
                 }
@@ -106,6 +112,21 @@ public class DijkstraStrategy implements PathFinding {
         }
 
         return path;
+    }
+
+    @Override
+    public Map<UUID, Double> getDistances() {
+        return Collections.unmodifiableMap(distances);
+    }
+
+    @Override
+    public Map<UUID, UUID> getPath() {
+        return Collections.unmodifiableMap(predecessors);
+    }
+
+    @Override
+    public double getPathCost(UUID target) {
+        return distances.getOrDefault(target, Double.POSITIVE_INFINITY);
     }
 
     @Override

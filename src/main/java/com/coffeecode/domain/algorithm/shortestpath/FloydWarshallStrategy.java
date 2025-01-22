@@ -1,4 +1,4 @@
-package com.coffeecode.domain.algorithm.strategy;
+package com.coffeecode.domain.algorithm.shortestpath;
 
 import java.util.ArrayList;
 import java.util.Collections;

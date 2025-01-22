@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.coffeecode.domain.algorithm.pathfinding.DFStrategy;
 import com.coffeecode.domain.model.Locations;
 import com.coffeecode.domain.model.Route;
 
