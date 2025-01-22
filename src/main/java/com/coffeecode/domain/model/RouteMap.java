@@ -26,27 +26,28 @@ public class RouteMap {
         this.routes = new HashMap<>();
     }
 
-    public void addLocation(Locations location) {
-        locations.put(location.id(), location);
-        // Create fully connected graph
-        if (locations.size() > 1) {
-            locations.values().stream()
-                    .filter(l -> !l.equals(location))
-                    .forEach(l -> {
-                        double distance = calculator.calculateDistance(location, l);
-                        Route[] newRoutes = Route.createBidirectional(
-                                location.id(), l.id(),
-                                distance, Route.RouteType.DIRECT);
-                        addRoutes(newRoutes);
-                    });
-        }
+    public Optional<Route> getRoute(UUID source, UUID target) {
+
+        return Optional.ofNullable(routes.get(source))
+                .map(m -> m.get(target));
+
     }
 
-    private void addRoutes(Route... newRoutes) {
-        for (Route route : newRoutes) {
-            routes.computeIfAbsent(route.sourceId(), k -> new HashMap<>())
-                    .put(route.targetId(), route);
-        }
+    public void addRoute(UUID sourceId, UUID targetId) {
+
+        double distance = calculateDirectDistance(sourceId, targetId);
+
+        Route route = new Route(sourceId, targetId, distance, Route.RouteType.DIRECT);
+        Route reverseRoute = new Route(targetId, sourceId, distance, Route.RouteType.DIRECT);
+
+        routes.computeIfAbsent(sourceId, k -> new HashMap<>()).put(targetId, route);
+        routes.computeIfAbsent(targetId, k -> new HashMap<>()).put(sourceId, reverseRoute);
+
+    }
+
+    public void addLocation(Locations location) {
+        locations.put(location.id(), location);
+        // Remove auto-connections
     }
 
     public Collection<Locations> getLocations() {
@@ -57,11 +58,6 @@ public class RouteMap {
         return routes.values().stream()
                 .flatMap(m -> m.values().stream())
                 .toList();
-    }
-
-    public Optional<Route> getRoute(UUID source, UUID target) {
-        return Optional.ofNullable(routes.get(source))
-                .map(m -> m.get(target));
     }
 
     public Optional<Double> getDistance(UUID from, UUID to) {
@@ -84,5 +80,16 @@ public class RouteMap {
 
     public Optional<Locations> getLocation(UUID id) {
         return Optional.ofNullable(locations.get(id));
+    }
+
+    public boolean hasRoute(UUID sourceId, UUID targetId) {
+
+        return getRoutes().stream()
+                .anyMatch(route -> route.getSourceId().equals(sourceId) && route.getTargetId().equals(targetId));
+    }
+
+    public void clear() {
+        locations.clear();
+        routes.clear();
     }
 }

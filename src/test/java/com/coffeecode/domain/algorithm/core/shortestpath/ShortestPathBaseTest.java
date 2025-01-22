@@ -8,6 +8,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.coffeecode.domain.algorithm.strategy.BasePathFindingTest;
 import com.coffeecode.domain.model.Locations;
@@ -15,15 +16,16 @@ import com.coffeecode.domain.model.Route;
 
 public abstract class ShortestPathBaseTest extends BasePathFindingTest {
 
+    @BeforeEach
     @Override
     protected void setUp() {
         super.setUp();
         testLocations = new HashMap<>();
         setupTestLocations();
+        setupRoutes();
     }
 
     private void setupTestLocations() {
-        // Create test grid
         createLocation("A", 0.0, 0.0);
         createLocation("B", 1.0, 1.0);
         createLocation("C", 2.0, 2.0);
@@ -34,13 +36,34 @@ public abstract class ShortestPathBaseTest extends BasePathFindingTest {
         createLocation("H", 1.0, 6.0);
         createLocation("I", 2.0, 6.0);
 
-        // Add to route map
         testLocations.values().forEach(routeMap::addLocation);
     }
 
-    private void createLocation(String name, double lat, double lon) {
-        Locations location = new Locations(name, lat, lon);
-        testLocations.put(name, location);
+    private void setupRoutes() {
+        // Grid connections
+        addBidirectionalRoute("A", "B");
+        addBidirectionalRoute("B", "C");
+        addBidirectionalRoute("D", "E");
+        addBidirectionalRoute("E", "F");
+        addBidirectionalRoute("G", "H");
+        addBidirectionalRoute("H", "I");
+
+        // Vertical connections
+        addBidirectionalRoute("A", "D");
+        addBidirectionalRoute("B", "E");
+        addBidirectionalRoute("C", "F");
+        addBidirectionalRoute("D", "G");
+        addBidirectionalRoute("E", "H");
+        addBidirectionalRoute("F", "I");
+    }
+
+    private void addBidirectionalRoute(String from, String to) {
+        Locations source = testLocations.get(from);
+        Locations target = testLocations.get(to);
+
+        double distance = routeMap.calculateDirectDistance(source.id(), target.id());
+        routeMap.addRoute(source.id(), target.id());
+        routeMap.addRoute(target.id(), source.id());
     }
 
     protected boolean isShortestPath(List<Route> path, UUID source, UUID target) {

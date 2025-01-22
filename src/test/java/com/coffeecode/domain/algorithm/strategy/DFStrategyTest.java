@@ -27,6 +27,11 @@ class DFStrategyTest extends BasePathFindingTest {
         Locations start = testLocations.get("A");
         Locations end = testLocations.get("I");
 
+        // Populate routeMap with locations and routes
+        routeMap.addLocation(start);
+        routeMap.addLocation(end);
+        routeMap.addRoute(start.id(), end.id());
+
         List<Route> path = dfs.findPath(routeMap, start.id(), end.id());
         printRoutes(path);
 

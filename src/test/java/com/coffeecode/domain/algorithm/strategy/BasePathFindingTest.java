@@ -44,7 +44,7 @@ public abstract class BasePathFindingTest {
         });
     }
 
-    private void createLocation(String name, double lat, double lon) {
+    protected void createLocation(String name, double lat, double lon) {
         Locations location = new Locations(name, lat, lon);
         testLocations.put(name, location);
     }

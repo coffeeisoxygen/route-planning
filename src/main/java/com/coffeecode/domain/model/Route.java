@@ -2,6 +2,8 @@ package com.coffeecode.domain.model;
 
 import java.util.UUID;
 
+import com.coffeecode.domain.model.Route.RouteType;
+
 public record Route(
         UUID sourceId,
         UUID targetId,
@@ -19,7 +21,7 @@ public record Route(
         CALCULATED  // Algorithm calculated
     }
 
-    public Route    {
+    public Route {
         if (distance < 0) {
             throw new IllegalArgumentException("Distance cannot be negative");
         }
@@ -36,4 +38,17 @@ public record Route(
             new Route(target, source, distance, type)
         };
     }
+
+    public UUID getSourceId() {
+
+        return sourceId;
+
+    }
+
+    public UUID getTargetId() {
+
+        return targetId;
+
+    }
+
 }

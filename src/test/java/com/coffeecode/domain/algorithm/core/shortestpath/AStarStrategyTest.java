@@ -74,18 +74,34 @@ class AStarStrategyTest extends ShortestPathBaseTest {
         assertTrue(path.isEmpty(), "Path should be empty when no routes exist between locations");
     }
 
+
     @Test
     void getPathCost_shouldMatchPathDistance() {
+        // Setup
         Locations start = testLocations.get("A");
         Locations end = testLocations.get("I");
         assertNotNull(start, "Start location not found");
         assertNotNull(end, "End location not found");
 
+        // Find path
         List<Route> path = aStar.findPath(routeMap, start.id(), end.id());
-        double expectedCost = calculateTotalDistance(path);
-        double actualCost = aStar.getPathCost(end.id());
+        assertFalse(path.isEmpty(), "Path should exist");
 
+        // Debug output
+        System.out.println("Path from " + start.name() + " to " + end.name() + ":");
+        printRoutes(path);
+
+        // Calculate costs
+        double expectedCost = calculateTotalDistance(path);
+        System.out.println("Expected cost: " + expectedCost);
+
+        double actualCost = aStar.getPathCost(end.id());
+        System.out.println("Actual cost: " + actualCost);
+
+        // Verify
+        assertTrue(expectedCost > 0, "Expected cost should be positive");
         assertEquals(expectedCost, actualCost, 0.001,
-                String.format("Path cost mismatch: expected %.2f but got %.2f", expectedCost, actualCost));
+                String.format("Path cost mismatch: expected %.2f but got %.2f",
+                        expectedCost, actualCost));
     }
 }
