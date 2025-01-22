@@ -2,9 +2,9 @@ package com.coffeecode.infrastructure.distance;
 
 import org.springframework.stereotype.Component;
 
+import com.coffeecode.domain.exception.InvalidLocationException;
 import com.coffeecode.domain.util.DistanceCalculator;
 import com.coffeecode.domain.validation.CoordinateValidator;
-import com.coffeecode.domain.validation.ValidationException;
 
 @Component
 public class HaversineCalculator implements DistanceCalculator {
@@ -16,7 +16,7 @@ public class HaversineCalculator implements DistanceCalculator {
         try {
             CoordinateValidator.validate(fromLat, fromLon);
             CoordinateValidator.validate(toLat, toLon);
-        } catch (ValidationException e) {
+        } catch (InvalidLocationException e) {
             throw new DistanceCalculatorException("Invalid coordinates", e);
         }
 

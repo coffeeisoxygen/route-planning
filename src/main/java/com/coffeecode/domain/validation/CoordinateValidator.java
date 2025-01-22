@@ -1,5 +1,7 @@
 package com.coffeecode.domain.validation;
 
+import com.coffeecode.domain.exception.InvalidLocationException;
+
 public final class CoordinateValidator {
 
     private static final double MIN_LATITUDE = -90.0;
@@ -13,7 +15,7 @@ public final class CoordinateValidator {
 
     public static void validateLatitude(double latitude) {
         if (latitude < MIN_LATITUDE || latitude > MAX_LATITUDE) {
-            throw new ValidationException(
+            throw new InvalidLocationException(
                     String.format("Latitude must be between %f and %f",
                             MIN_LATITUDE, MAX_LATITUDE));
         }
@@ -21,7 +23,7 @@ public final class CoordinateValidator {
 
     public static void validateLongitude(double longitude) {
         if (longitude < MIN_LONGITUDE || longitude > MAX_LONGITUDE) {
-            throw new ValidationException(
+            throw new InvalidLocationException(
                     String.format("Longitude must be between %f and %f",
                             MIN_LONGITUDE, MAX_LONGITUDE));
         }

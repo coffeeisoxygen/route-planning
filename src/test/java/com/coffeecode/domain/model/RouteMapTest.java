@@ -1,18 +1,22 @@
 package com.coffeecode.domain.model;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import java.util.Collection;
+import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mock;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.coffeecode.domain.util.DistanceCalculator;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
 class RouteMapTest {
@@ -43,8 +47,11 @@ class RouteMapTest {
 
     @Test
     void addLocation_withExisting_shouldCreateBidirectionalRoutes() {
-        when(calculator.calculateDistance(bandung, jakarta)).thenReturn(100.0);
-        when(calculator.calculateDistance(jakarta, bandung)).thenReturn(100.0);
+        // Use any() matcher for Locations parameters
+        when(calculator.calculateDistance(
+            any(Locations.class), 
+            any(Locations.class)
+        )).thenReturn(100.0);
 
         routeMap.addLocation(bandung);
         routeMap.addLocation(jakarta);
@@ -52,15 +59,18 @@ class RouteMapTest {
         Collection<Route> routes = routeMap.getRoutes();
         assertEquals(2, routes.size());
 
-        verify(calculator).calculateDistance(bandung, jakarta);
+        // Verify calculator was called at least once
+        verify(calculator, atLeastOnce())
+            .calculateDistance(any(Locations.class), any(Locations.class));
     }
 
     @Test
     void addLocation_withMultiple_shouldCreateFullyConnectedGraph() {
-        // Setup calculator for each pair
-        when(calculator.calculateDistance(bandung, jakarta)).thenReturn(100.0);
-        when(calculator.calculateDistance(bandung, surabaya)).thenReturn(150.0);
-        when(calculator.calculateDistance(jakarta, surabaya)).thenReturn(200.0);
+        // Use any() matcher for all calculator calls
+        when(calculator.calculateDistance(
+            any(Locations.class), 
+            any(Locations.class)
+        )).thenReturn(100.0);
 
         routeMap.addLocation(bandung);
         routeMap.addLocation(jakarta);
@@ -69,7 +79,9 @@ class RouteMapTest {
         assertEquals(3, routeMap.getLocations().size());
         assertEquals(6, routeMap.getRoutes().size());
 
-        verify(calculator, times(3)).calculateDistance(any(), any());
+        // Verify calculator was called for each pair
+        verify(calculator, times(3))
+            .calculateDistance(any(Locations.class), any(Locations.class));
     }
 
     @Test

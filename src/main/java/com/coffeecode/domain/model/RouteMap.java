@@ -63,4 +63,26 @@ public class RouteMap {
         return Optional.ofNullable(routes.get(source))
                 .map(m -> m.get(target));
     }
+
+    public Optional<Double> getDistance(UUID from, UUID to) {
+        return getRoute(from, to).map(Route::distance);
+    }
+
+    public double calculateDirectDistance(UUID from, UUID to) {
+        Locations fromLoc = locations.get(from);
+        Locations toLoc = locations.get(to);
+
+        if (fromLoc == null || toLoc == null) {
+            throw new IllegalArgumentException("Locations not found");
+        }
+
+        return calculator.calculateDistance(
+                fromLoc.latitude(), fromLoc.longitude(),
+                toLoc.latitude(), toLoc.longitude()
+        );
+    }
+
+    public Optional<Locations> getLocation(UUID id) {
+        return Optional.ofNullable(locations.get(id));
+    }
 }

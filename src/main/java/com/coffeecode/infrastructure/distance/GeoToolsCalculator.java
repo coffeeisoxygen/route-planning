@@ -7,9 +7,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import com.coffeecode.domain.exception.InvalidLocationException;
 import com.coffeecode.domain.util.DistanceCalculator;
 import com.coffeecode.domain.validation.CoordinateValidator;
-import com.coffeecode.domain.validation.ValidationException;
 
 @Component
 @Primary
@@ -30,7 +30,7 @@ public class GeoToolsCalculator implements DistanceCalculator {
         try {
             CoordinateValidator.validate(fromLat, fromLon);
             CoordinateValidator.validate(toLat, toLon);
-        } catch (ValidationException e) {
+        } catch (InvalidLocationException e) {
             throw new DistanceCalculatorException("Invalid coordinates provided", e);
         }
 
