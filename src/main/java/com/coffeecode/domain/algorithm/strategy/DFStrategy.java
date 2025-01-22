@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,29 +29,36 @@ public class DFStrategy implements PathFinding {
 
         stack.push(source);
         visited.add(source);
+        boolean foundTarget = false;
 
-        while (!stack.isEmpty()) {
-            UUID current = stack.pop();
+        while (!stack.isEmpty() && !foundTarget) {
+            UUID current = stack.peek();
 
             if (current.equals(target)) {
-                return reconstructPath(pathParent, source, target);
+                foundTarget = true;
+                continue;
             }
 
-            for (Route route : map.getRoutes()) {
-                if (route.sourceId().equals(current) && !visited.contains(route.targetId())) {
-                    stack.push(route.targetId());
-                    visited.add(route.targetId());
-                    pathParent.put(route.targetId(), route);
-                }
-                if (route.targetId().equals(current) && !visited.contains(route.sourceId())) {
-                    stack.push(route.sourceId());
-                    visited.add(route.sourceId());
-                    pathParent.put(route.sourceId(), route);
-                }
+            Optional<Route> nextRoute = map.getRoutes().stream()
+                    .filter(r -> r.sourceId().equals(current))
+                    .filter(r -> !visited.contains(r.targetId()))
+                    .min((r1, r2) -> Double.compare(r1.distance(), r2.distance()));
+
+            if (nextRoute.isPresent()) {
+                UUID next = nextRoute.get().targetId();
+                stack.push(next);
+                visited.add(next);
+                pathParent.put(next, nextRoute.get());
+            } else {
+                stack.pop();
             }
         }
 
-        return Collections.emptyList();
+        if (!foundTarget) {
+            return Collections.emptyList();
+        }
+
+        return reconstructPath(pathParent, source, target);
     }
 
     private List<Route> reconstructPath(Map<UUID, Route> pathParent, UUID source, UUID target) {
@@ -60,11 +68,7 @@ public class DFStrategy implements PathFinding {
         while (!current.equals(source)) {
             Route route = pathParent.get(current);
             path.add(0, route);
-            if (route.sourceId().equals(current)) {
-                current = route.targetId();
-            } else {
-                current = route.sourceId();
-            }
+            current = route.sourceId();
         }
 
         return path;
