@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
+@Getter
 public class MapHandler {
 
     // Inner enum definition
@@ -47,11 +48,14 @@ public class MapHandler {
     private final Map<MapType, DefaultTileFactory> tileFactoryCache = new EnumMap<>(MapType.class);
     @Getter
     private final JXMapViewer mapViewer;
+    @Getter
+    private final WaypointHandler waypointHandler;
     private final MapFileCache mapCache;
 
     public MapHandler(MapFileCache mapCache) {
         this.mapCache = mapCache;
         this.mapViewer = initializeMapViewer();
+        this.waypointHandler = new WaypointHandler(mapViewer);
     }
 
     private JXMapViewer initializeMapViewer() {

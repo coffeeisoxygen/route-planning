@@ -1,6 +1,7 @@
 package com.coffeecode.view.map.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 
@@ -8,9 +9,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
+import com.coffeecode.view.map.context.MapViewContext;
 import com.coffeecode.view.map.handler.MapHandler;
 import com.coffeecode.view.map.handler.WaypointHandler;
-import com.coffeecode.view.map.context.MapViewContext;
 
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
@@ -37,16 +38,17 @@ public class MapPanel extends JPanel {
         JPanel controlPanel = createControlPanel();
         mapHandler.getMapViewer().setLayout(null);
         mapHandler.getMapViewer().add(controlPanel);
-        controlPanel.setBounds(10, 10, 250, 35); // Position at top-left, smaller control panel
+        // Increase width to accommodate all buttons
+        controlPanel.setBounds(10, 10, 400, 35);
     }
 
     private JPanel createControlPanel() {
         JPanel panel = new JPanel();
-        panel.setOpaque(false); // Full transparency for the control panel
-        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5)); // Adjust spacing between components
+        panel.setOpaque(false); // Make panel visible
+        panel.setBackground(new Color(255, 255, 255, 200)); // Semi-transparent white
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
-        // Set preferred size to make control panel smaller
-        panel.setPreferredSize(new Dimension(350, 35));  // Increased panel width
+        panel.setPreferredSize(new Dimension(400, 35));  // Match bounds width
 
         // Different sizes for combo and buttons
         Dimension comboSize = new Dimension(150, 25);    // Wider combo box
@@ -61,7 +63,6 @@ public class MapPanel extends JPanel {
                 -> mapHandler.switchMapType((MapHandler.MapType) mapTypeCombo.getSelectedItem())
         );
 
-        // Buttons with same size
         JButton addPointBtn = new JButton("Add Points");
         addPointBtn.setPreferredSize(buttonSize);
         addPointBtn.setMargin(new java.awt.Insets(2, 5, 2, 5));

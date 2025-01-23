@@ -5,13 +5,12 @@ import com.coffeecode.view.map.handler.MapHandler;
 import com.coffeecode.view.map.handler.WaypointHandler;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 public class MapViewContext {
-
-    @Getter(lazy = true)
-    private static final MapViewContext instance = new MapViewContext();
-
+    private static MapViewContext instance;
     private final MapFileCache mapFileCache;
     private final MapHandler mapHandler;
     private final WaypointHandler waypointHandler;
@@ -22,5 +21,10 @@ public class MapViewContext {
         this.waypointHandler = new WaypointHandler(mapHandler.getMapViewer());
     }
 
-    // No need for getInstance() method as we use @Getter(lazy=true)
+    public static synchronized MapViewContext getInstance() {
+        if (instance == null) {
+            instance = new MapViewContext();
+        }
+        return instance;
+    }
 }

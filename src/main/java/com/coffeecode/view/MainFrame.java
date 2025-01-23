@@ -32,10 +32,4 @@ public class MainFrame extends JFrame {
         add(mapPanel, BorderLayout.CENTER);
     }
 
-    public static void main(String[] args) {
-        javax.swing.SwingUtilities.invokeLater(() -> {
-            MainFrame frame = new MainFrame();
-            frame.setVisible(true);
-        });
-    }
 }
