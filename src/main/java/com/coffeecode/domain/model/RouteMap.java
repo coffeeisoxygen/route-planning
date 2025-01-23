@@ -92,8 +92,16 @@ public class RouteMap {
                 calculateDirectDistance(sourceId, targetId),
                 Route.RouteType.DIRECT);
         for (Route route : bidirectionalRoutes) {
-            this.routes.computeIfAbsent(route.sourceId(), k -> new HashMap<>())
-                    .put(route.targetId(), route);
+            Route activeRoute = Route.builder()
+                    .sourceId(route.sourceId())
+                    .targetId(route.targetId())
+                    .distance(route.distance())
+                    .weight(route.weight())
+                    .status(Route.RouteStatus.ACTIVE) // Ensure route is active
+                    .type(route.type())
+                    .build();
+            this.routes.computeIfAbsent(activeRoute.sourceId(), k -> new HashMap<>())
+                    .put(activeRoute.targetId(), activeRoute);
         }
     }
 

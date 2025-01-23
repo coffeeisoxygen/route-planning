@@ -9,6 +9,18 @@ public record PathStatistics(
         return endTime - startTime;
     }
 
+    public int getVisitedNodes() {
+        return visitedNodes;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public long getEndTime() {
+        return endTime;
+    }
+
     public static class Builder {
 
         private int visitedNodes;
