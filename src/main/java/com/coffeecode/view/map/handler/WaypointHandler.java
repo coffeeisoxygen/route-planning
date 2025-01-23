@@ -9,20 +9,26 @@ import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.DefaultWaypoint;
 import org.jxmapviewer.viewer.GeoPosition;
 import org.jxmapviewer.viewer.WaypointPainter;
-import lombok.Getter;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class WaypointHandler {
 
+    @Getter
     private final JXMapViewer mapViewer;
     @Getter
-    private final Set<DefaultWaypoint> waypoints;
-    private final WaypointPainter<DefaultWaypoint> waypointPainter;
-    private boolean addingEnabled = false;
+    private final Set<DefaultWaypoint> waypoints = new HashSet<>();
+    @Getter
+    private final WaypointPainter<DefaultWaypoint> waypointPainter = new WaypointPainter<>();
+    @Getter
+    @Setter
+    private boolean addingEnabled;
 
     public WaypointHandler(JXMapViewer mapViewer) {
         this.mapViewer = mapViewer;
-        this.waypoints = new HashSet<>();
-        this.waypointPainter = new WaypointPainter<>();
         setupMouseListener();
         setupPainter();
     }
@@ -45,6 +51,7 @@ public class WaypointHandler {
     }
 
     public void addWaypoint(GeoPosition pos) {
+        log.debug("Adding waypoint at: {}", pos);
         waypoints.add(new DefaultWaypoint(pos));
         updatePainter();
     }

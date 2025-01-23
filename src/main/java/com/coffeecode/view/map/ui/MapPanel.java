@@ -16,35 +16,19 @@ public class MapPanel extends JPanel {
     private final transient MapHandler mapHandler;
 
     public MapPanel() {
-        mapHandler = new MapHandler();
+        this.mapHandler = new MapHandler();
         initComponents();
     }
 
     private void initComponents() {
         setLayout(new BorderLayout());
-
-        // Add map viewer
         add(mapHandler.getMapViewer(), BorderLayout.CENTER);
-
-        // Add overlay panel
-        JPanel overlayPanel = createOverlayPanel();
-        mapHandler.getMapViewer().setLayout(null); // Enable absolute positioning on the map viewer
-        mapHandler.getMapViewer().add(overlayPanel);
-        overlayPanel.setBounds(10, 10, 150, 30); // Position the overlay panel
-    }
-
-    private JPanel createOverlayPanel() {
-        JPanel panel = new JPanel();
-        panel.setOpaque(false); // Make panel transparent
-        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0)); // Align content to the left
-
-        JComboBox<MapHandler.MapType> mapTypeCombo = new JComboBox<>(MapHandler.MapType.values());
-        mapTypeCombo.addActionListener(e
-                -> mapHandler.switchMapType((MapType) mapTypeCombo.getSelectedItem())
-        );
-
-        panel.add(mapTypeCombo);
-        return panel;
+        
+        // Use only one control panel
+        JPanel controlPanel = createControlPanel();
+        mapHandler.getMapViewer().setLayout(null);
+        mapHandler.getMapViewer().add(controlPanel);
+        controlPanel.setBounds(10, 10, 300, 30);
     }
 
     private JPanel createControlPanel() {

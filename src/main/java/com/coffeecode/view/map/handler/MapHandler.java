@@ -17,9 +17,11 @@ import org.jxmapviewer.viewer.GeoPosition;
 import org.jxmapviewer.viewer.TileFactoryInfo;
 
 import lombok.Getter;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-@Setter
+@Slf4j
+@RequiredArgsConstructor
 @Getter
 public class MapHandler {
 
@@ -43,16 +45,9 @@ public class MapHandler {
     }
 
     private static final File CACHE_DIR = new File(System.getProperty("user.home") + File.separator + ".jxmapviewer2cache");
-    private final Map<MapType, DefaultTileFactory> tileFactoryCache;
-    private final JXMapViewer mapViewer;
-    private final WaypointHandler waypointHandler;
-
-    public MapHandler() {
-        this.tileFactoryCache = new EnumMap<>(MapType.class);
-        this.mapViewer = initializeMapViewer();
-        this.waypointHandler = new WaypointHandler(mapViewer);
-        initializeCache();
-    }
+    private final Map<MapType, DefaultTileFactory> tileFactoryCache = new EnumMap<>(MapType.class);
+    private final JXMapViewer mapViewer = initializeMapViewer();
+    private final WaypointHandler waypointHandler = new WaypointHandler(mapViewer);
 
     private void initializeCache() {
         if (!CACHE_DIR.exists()) {
@@ -96,6 +91,7 @@ public class MapHandler {
     }
 
     public void switchMapType(MapType mapType) {
+        log.info("Switching map type to: {}", mapType);
         // Store current view state
         int zoom = mapViewer.getZoom();
         GeoPosition center = mapViewer.getCenterPosition();
