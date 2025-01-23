@@ -2,7 +2,7 @@ package com.coffeecode.application.port.input;
 
 import java.util.UUID;
 
-import com.coffeecode.domain.model.Locations;
+import com.coffeecode.domain.location.model.Locations;
 
 public interface LocationManagementUseCase {
 

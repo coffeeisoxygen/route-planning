@@ -3,15 +3,15 @@ package com.coffeecode.domain.algorithm.result;
 import java.util.Collections;
 import java.util.List;
 
-import com.coffeecode.domain.model.Route;
+import com.coffeecode.domain.route.model.Route;
 
-public record PathResult(
+public record ShortestPathResult(
         List<Route> path,
         double totalDistance,
-        PathStatistics statistics,
+        ExecutionStatistics stats,
         String algorithmName) {
 
-    public PathResult    {
+    public ShortestPathResult    {
         path = Collections.unmodifiableList(path);
     }
 }

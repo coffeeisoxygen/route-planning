@@ -12,8 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.coffeecode.domain.model.Locations;
-import com.coffeecode.domain.util.DistanceCalculator;
+import com.coffeecode.domain.location.model.Locations;
+import com.coffeecode.domain.location.util.DistanceCalculator;
 
 @ExtendWith(MockitoExtension.class)
 class InMemoryLocationRepositoryTest {

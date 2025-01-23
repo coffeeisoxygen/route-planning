@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 import com.coffeecode.application.port.output.LocationPersistancePort;
-import com.coffeecode.domain.model.Locations;
-import com.coffeecode.domain.util.DistanceCalculator;
+import com.coffeecode.domain.location.model.Locations;
+import com.coffeecode.domain.location.util.DistanceCalculator;
 
 @Repository
 @Primary

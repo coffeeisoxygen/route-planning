@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
 import com.coffeecode.application.port.output.LocationPersistancePort;
-import com.coffeecode.domain.util.DistanceCalculator;
-import com.coffeecode.infrastructure.distance.GeoToolsCalculator;
+import com.coffeecode.domain.location.util.DistanceCalculator;
+import com.coffeecode.domain.location.util.GeoToolsCalculator;
 import com.coffeecode.infrastructure.persistance.InMemoryLocationRepository;
 
 @Configuration

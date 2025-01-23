@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.coffeecode.domain.algorithm.result.PathStatistics;
-import com.coffeecode.domain.model.Locations;
-import com.coffeecode.domain.model.Route;
-import com.coffeecode.domain.model.RouteMap;
-import com.coffeecode.infrastructure.distance.GeoToolsCalculator;
+import com.coffeecode.domain.algorithm.result.ExecutionStatistics;
+import com.coffeecode.domain.location.model.Locations;
+import com.coffeecode.domain.location.util.GeoToolsCalculator;
+import com.coffeecode.domain.route.RouteMap;
+import com.coffeecode.domain.route.model.Route;
 
 public class PathFindingAlgorithmTest {
 
@@ -147,10 +147,10 @@ public class PathFindingAlgorithmTest {
     @Test
     void testPerformanceComparison() {
         bfs.findPath(routeMap, jakarta.id(), surabaya.id());
-        PathStatistics bfsStats = bfs.getLastRunStatistics();
+        ExecutionStatistics bfsStats = bfs.getLastRunStatistics();
 
         dfs.findPath(routeMap, jakarta.id(), surabaya.id());
-        PathStatistics dfsStats = dfs.getLastRunStatistics();
+        ExecutionStatistics dfsStats = dfs.getLastRunStatistics();
 
         assertTrue(bfsStats.visitedNodes() > 0, "BFS should visit at least one node");
         assertTrue(dfsStats.visitedNodes() > 0, "DFS should visit at least one node");
@@ -281,7 +281,7 @@ public class PathFindingAlgorithmTest {
         Locations malang = new Locations("Malang", -7.983908, 112.621391);
         Locations solo = new Locations("Solo", -7.575489, 110.824327);
         Locations kediri = new Locations("Kediri", -7.848016, 112.017829);
-        
+
         // Add all locations
         routeMap.addLocation(semarang);
         routeMap.addLocation(yogyakarta);

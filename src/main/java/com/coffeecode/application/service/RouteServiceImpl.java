@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import com.coffeecode.domain.exception.RouteNotFoundException;
-import com.coffeecode.domain.model.Route;
-import com.coffeecode.domain.model.RouteMap;
+import com.coffeecode.domain.route.RouteMap;
+import com.coffeecode.domain.route.model.Route;
 
 @Service
 @Primary

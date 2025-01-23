@@ -1,6 +1,6 @@
-package com.coffeecode.domain.util;
+package com.coffeecode.domain.location.util;
 
-import com.coffeecode.domain.model.Locations;
+import com.coffeecode.domain.location.model.Locations;
 
 public interface DistanceCalculator {
 

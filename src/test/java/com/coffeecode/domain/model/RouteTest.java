@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.coffeecode.domain.route.model.Route;
+
 class RouteTest {
 
     private final UUID source = UUID.randomUUID();

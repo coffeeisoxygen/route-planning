@@ -12,8 +12,8 @@ import com.coffeecode.application.port.input.LocationManagementUseCase;
 import com.coffeecode.application.port.input.LocationQueryUseCase;
 import com.coffeecode.application.port.output.LocationPersistancePort;
 import com.coffeecode.domain.exception.LocationNotFoundException;
-import com.coffeecode.domain.model.Locations;
-import com.coffeecode.domain.model.RouteMap;
+import com.coffeecode.domain.location.model.Locations;
+import com.coffeecode.domain.route.RouteMap;
 
 @Service
 @Primary

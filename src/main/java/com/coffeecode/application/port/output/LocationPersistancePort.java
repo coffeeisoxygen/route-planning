@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.coffeecode.domain.model.Locations;
+import com.coffeecode.domain.location.model.Locations;
 
 public interface LocationPersistancePort {
 

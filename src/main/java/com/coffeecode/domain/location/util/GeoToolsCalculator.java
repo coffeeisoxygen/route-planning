@@ -1,4 +1,4 @@
-package com.coffeecode.infrastructure.distance;
+package com.coffeecode.domain.location.util;
 
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.GeodeticCalculator;
@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.exception.InvalidLocationException;
-import com.coffeecode.domain.util.DistanceCalculator;
-import com.coffeecode.domain.validation.CoordinateValidator;
+import com.coffeecode.domain.location.exception.DistanceCalculatorException;
+import com.coffeecode.domain.location.validation.LocationValidator;
 
 @Component
 @Primary
@@ -28,8 +28,8 @@ public class GeoToolsCalculator implements DistanceCalculator {
     @Override
     public double calculateDistance(double fromLat, double fromLon, double toLat, double toLon) {
         try {
-            CoordinateValidator.validate(fromLat, fromLon);
-            CoordinateValidator.validate(toLat, toLon);
+            LocationValidator.validateCoordinates(fromLat, fromLon);
+            LocationValidator.validateCoordinates(toLat, toLon);
         } catch (InvalidLocationException e) {
             throw new DistanceCalculatorException("Invalid coordinates provided", e);
         }

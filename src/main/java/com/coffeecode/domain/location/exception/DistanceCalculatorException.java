@@ -1,4 +1,4 @@
-package com.coffeecode.infrastructure.distance;
+package com.coffeecode.domain.location.exception;
 
 public class DistanceCalculatorException extends RuntimeException {
 

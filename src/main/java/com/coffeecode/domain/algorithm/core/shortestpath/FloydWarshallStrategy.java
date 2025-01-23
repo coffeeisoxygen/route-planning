@@ -13,11 +13,11 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.algorithm.api.AllPairsShortestPath;
-import com.coffeecode.domain.algorithm.component.PathFindingStats;
-import com.coffeecode.domain.algorithm.result.PathStatistics;
-import com.coffeecode.domain.model.Locations;
-import com.coffeecode.domain.model.Route;
-import com.coffeecode.domain.model.RouteMap;
+import com.coffeecode.domain.algorithm.result.PathFindingStats;
+import com.coffeecode.domain.location.model.Locations;
+import com.coffeecode.domain.algorithm.result.ExecutionStatistics;
+import com.coffeecode.domain.route.RouteMap;
+import com.coffeecode.domain.route.model.Route;
 
 @Component
 public class FloydWarshallStrategy implements AllPairsShortestPath {
@@ -137,7 +137,7 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
     }
 
     @Override
-    public PathStatistics getLastRunStatistics() {
+    public ExecutionStatistics getLastRunStatistics() {
         return stats.getLastRunStats();
     }
 

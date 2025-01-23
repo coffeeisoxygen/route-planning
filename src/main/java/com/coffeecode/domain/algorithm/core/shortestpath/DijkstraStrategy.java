@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.algorithm.api.SearchNode;
 import com.coffeecode.domain.algorithm.api.SingleSourceShortestPath;
-import com.coffeecode.domain.algorithm.component.PathFindingStats;
-import com.coffeecode.domain.algorithm.result.PathStatistics;
-import com.coffeecode.domain.model.Route;
-import com.coffeecode.domain.model.RouteMap;
+import com.coffeecode.domain.algorithm.result.PathFindingStats;
+import com.coffeecode.domain.algorithm.result.ExecutionStatistics;
+import com.coffeecode.domain.route.RouteMap;
+import com.coffeecode.domain.route.model.Route;
 
 @Component
 public class DijkstraStrategy implements SingleSourceShortestPath {
@@ -70,7 +70,7 @@ public class DijkstraStrategy implements SingleSourceShortestPath {
         stats.startTracking();
         initialize(source);
 
-        PriorityQueue<Node> queue = new PriorityQueue<>();
+        PriorityQueue<SearchNode> queue = new PriorityQueue<>();
         Set<UUID> visited = new HashSet<>();
 
         queue.offer(new Node(source, 0));
@@ -80,34 +80,42 @@ public class DijkstraStrategy implements SingleSourceShortestPath {
             Node current = queue.poll();
             stats.incrementVisited();
 
-            if (current.id.equals(target)) {
+            // Don't skip target node when finding circular paths
+            if (!visited.contains(current.id) || current.id.equals(target)) {
+                // Only add to visited if not the target (allows revisiting for circular paths)
+                if (!current.id.equals(target)) {
+                    visited.add(current.id);
+                }
+
+                for (Route route : map.getActiveRoutes(current.id)) {
+                    UUID neighbor = route.targetId();
+                    double newDistance = distances.get(current.id) + route.distance();
+
+                    if (!distances.containsKey(neighbor)
+                            || newDistance < distances.get(neighbor)) {
+
+                        distances.put(neighbor, newDistance);
+                        pathParent.put(neighbor, route);
+                        predecessors.put(neighbor, current.id);
+                        queue.offer(new Node(neighbor, newDistance));
+                    }
+                }
+            }
+
+            // For non-circular paths, can return when target is found
+            if (current.id.equals(target) && !source.equals(target)) {
                 stats.stopTracking();
                 return reconstructPath(pathParent, source, target);
-            }
-
-            if (visited.contains(current.id)) {
-                continue;
-            }
-            visited.add(current.id);
-
-            for (Route route : map.getActiveRoutes(current.id)) {
-                UUID neighbor = route.targetId();
-                double newDistance = distances.get(current.id) + route.weight();
-
-                distances.computeIfAbsent(neighbor, k -> {
-                    pathParent.put(neighbor, route);
-                    queue.offer(new Node(neighbor, newDistance));
-                    return newDistance;
-                });
-                if (newDistance < distances.get(neighbor)) {
-                    distances.put(neighbor, newDistance);
-                    pathParent.put(neighbor, route);
-                    queue.offer(new Node(neighbor, newDistance));
-                }
             }
         }
 
         stats.stopTracking();
+
+        // For circular paths, reconstruct if we found any path back to source
+        if (source.equals(target) && pathParent.containsKey(target)) {
+            return reconstructPath(pathParent, source, target);
+        }
+
         return Collections.emptyList();
     }
 
@@ -125,6 +133,18 @@ public class DijkstraStrategy implements SingleSourceShortestPath {
         }
 
         return path;
+    }
+
+    private boolean isValidCircularPath(List<Route> path, UUID source) {
+        if (path.isEmpty()) {
+            return false;
+        }
+
+        // Verify path starts and ends at source
+        UUID firstNode = path.get(0).sourceId();
+        UUID lastNode = path.get(path.size() - 1).targetId();
+
+        return firstNode.equals(source) && lastNode.equals(source);
     }
 
     @Override
@@ -148,7 +168,7 @@ public class DijkstraStrategy implements SingleSourceShortestPath {
     }
 
     @Override
-    public PathStatistics getLastRunStatistics() {
+    public ExecutionStatistics getLastRunStatistics() {
         return stats.getLastRunStats();
     }
 }

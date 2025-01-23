@@ -12,8 +12,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import com.coffeecode.application.service.LocationServiceImpl;
 import com.coffeecode.application.service.RouteServiceImpl;
 import com.coffeecode.config.AppConfig;
-import com.coffeecode.domain.model.Locations;
-import com.coffeecode.domain.model.Route;
+import com.coffeecode.domain.location.model.Locations;
+import com.coffeecode.domain.route.model.Route;
 
 public class App {
 

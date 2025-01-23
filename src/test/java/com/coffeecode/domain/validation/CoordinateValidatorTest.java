@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import com.coffeecode.domain.exception.InvalidLocationException;
+import com.coffeecode.domain.location.CoordinateValidator;
 
 class CoordinateValidatorTest {
     

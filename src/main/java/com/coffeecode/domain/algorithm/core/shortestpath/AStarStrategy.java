@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.algorithm.api.SearchNode;
 import com.coffeecode.domain.algorithm.api.SingleSourceShortestPath;
-import com.coffeecode.domain.algorithm.component.PathFindingStats;
-import com.coffeecode.domain.algorithm.result.PathStatistics;
-import com.coffeecode.domain.model.Route;
-import com.coffeecode.domain.model.RouteMap;
+import com.coffeecode.domain.algorithm.result.PathFindingStats;
+import com.coffeecode.domain.algorithm.result.ExecutionStatistics;
+import com.coffeecode.domain.route.RouteMap;
+import com.coffeecode.domain.route.model.Route;
 
 @Component
 public class AStarStrategy implements SingleSourceShortestPath {
@@ -155,7 +155,7 @@ public class AStarStrategy implements SingleSourceShortestPath {
     }
 
     @Override
-    public PathStatistics getLastRunStatistics() {
+    public ExecutionStatistics getLastRunStatistics() {
         return stats.getLastRunStats();
     }
 }

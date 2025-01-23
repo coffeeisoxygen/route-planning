@@ -1,4 +1,4 @@
-package com.coffeecode.domain.validation;
+package com.coffeecode.domain.location.exception;
 
 public class ValidationException extends RuntimeException {
     public ValidationException(String message) {

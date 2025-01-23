@@ -8,7 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.coffeecode.infrastructure.distance.GeoToolsCalculator;
+import com.coffeecode.domain.location.model.Locations;
+import com.coffeecode.domain.location.util.GeoToolsCalculator;
+import com.coffeecode.domain.route.RouteMap;
+import com.coffeecode.domain.route.model.Route;
 
 class RouteMapTest {
     private RouteMap routeMap;
