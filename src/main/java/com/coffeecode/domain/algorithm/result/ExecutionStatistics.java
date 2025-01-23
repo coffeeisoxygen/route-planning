@@ -1,28 +1,33 @@
 package com.coffeecode.domain.algorithm.result;
 
-public record ExecutionStatistics(int visitedNodes, long startTime, long endTime) {
+public record ExecutionStatistics(
+        int visitedNodes,
+        long startTime,
+        long endTime) {
 
-    public long getExecutionTime() {
+    public long getDurationMs() {
         return endTime - startTime;
     }
 
-    public static class Tracker {
+    public static class Builder {
 
         private int visitedNodes;
         private long startTime;
         private long endTime;
 
-        public void start() {
-            startTime = System.nanoTime();
-            visitedNodes = 0;
+        public Builder start() {
+            this.startTime = System.currentTimeMillis();
+            return this;
         }
 
-        public void stop() {
-            endTime = System.nanoTime();
+        public Builder stop() {
+            this.endTime = System.currentTimeMillis();
+            return this;
         }
 
-        public void incrementVisited() {
-            visitedNodes++;
+        public Builder incrementVisited() {
+            this.visitedNodes++;
+            return this;
         }
 
         public ExecutionStatistics build() {

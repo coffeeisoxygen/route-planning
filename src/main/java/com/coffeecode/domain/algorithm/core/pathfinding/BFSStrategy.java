@@ -1,124 +1,56 @@
 package com.coffeecode.domain.algorithm.core.pathfinding;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.UUID;
-
-import org.springframework.stereotype.Component;
-
-import com.coffeecode.domain.algorithm.api.PathFinding;
-import com.coffeecode.domain.algorithm.api.SearchNode;
-import com.coffeecode.domain.algorithm.result.PathFindingStats;
-import com.coffeecode.domain.algorithm.result.ExecutionStatistics;
+import java.util.*;
+import com.coffeecode.domain.graph.Graph;
 import com.coffeecode.domain.route.model.Route;
-import com.coffeecode.domain.route.model.RouteMap;
 
-@Component
-public class BFSStrategy implements PathFinding {
-
-    private final PathFindingStats stats;
-
-    public BFSStrategy() {
-        this.stats = new PathFindingStats();
-    }
-
-    private static class Node implements SearchNode {
-
-        private final UUID id;
-        private final int depth;  // For level tracking
-
-        Node(UUID id, int depth) {
-            this.id = id;
-            this.depth = depth;
-        }
-
-        @Override
-        public UUID getId() {
-            return id;
-        }
-
-        @Override
-        public double getScore() {
-            return depth;
-        }
-    }
-
+public class BFSStrategy extends AbstractPathFinding {
     @Override
-    public List<Route> findPath(RouteMap map, UUID source, UUID target) {
-        stats.startTracking();
-        Queue<Node> queue = new LinkedList<>();
+    protected List<Route> executeFindPath(Graph graph, UUID source, UUID target) {
+        Queue<UUID> queue = new LinkedList<>();
         Map<UUID, Route> pathParent = new HashMap<>();
         Set<UUID> visited = new HashSet<>();
 
-        queue.offer(new Node(source, 0));
+        queue.offer(source);
+        visited.add(source);
 
         while (!queue.isEmpty()) {
-            Node current = queue.poll();
+            UUID current = queue.poll();
             stats.incrementVisited();
 
-            // Handle circular path
-            if (current.getId().equals(target)
-                    && (!current.getId().equals(source) || !pathParent.isEmpty())) {
-                stats.stopTracking();
+            if (current.equals(target)) {
                 return reconstructPath(pathParent, source, target);
             }
 
-            for (Route route : map.getActiveRoutes(current.getId())) {
-                UUID nextId = route.targetId();
-                // Allow revisit of target for circular paths
-                if (!visited.contains(nextId) || nextId.equals(target)) {
-                    queue.offer(new Node(nextId, current.depth + 1));
-                    visited.add(nextId);
-                    pathParent.put(nextId, route);
+            for (Route route : graph.getOutgoingEdges(current)) {
+                UUID neighbor = route.targetId();
+                if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    pathParent.put(neighbor, route);
+                    queue.offer(neighbor);
                 }
             }
         }
 
-        stats.stopTracking();
         return Collections.emptyList();
+    }
+
+    @Override
+    public String getStrategyName() {
+        return "BFS";
     }
 
     private List<Route> reconstructPath(Map<UUID, Route> pathParent, UUID source, UUID target) {
         List<Route> path = new ArrayList<>();
         UUID current = target;
 
-        // Changed: Allow reconstruction when source equals target
-        if (source.equals(target)) {
-            // Get last route that leads back to source
-            Route lastRoute = pathParent.get(source);
-            if (lastRoute != null) {
-                path.add(lastRoute);
-                current = lastRoute.sourceId();
-            }
-        }
-
-        while (!current.equals(source)) {
+        while (pathParent.containsKey(current)) {
             Route route = pathParent.get(current);
-            if (route == null) {
-                break;
-            }
             path.add(0, route);
             current = route.sourceId();
+            if (current.equals(source)) break;
         }
 
         return path;
     }
-
-    @Override
-    public ExecutionStatistics getLastRunStatistics() {
-        return stats.getLastRunStats();
-    }
-
-    @Override
-    public String getAlgorithmName() {
-        return "Breadth First Search";
-    }
-
 }

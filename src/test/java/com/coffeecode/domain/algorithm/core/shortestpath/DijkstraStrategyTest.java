@@ -5,6 +5,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
+import com.coffeecode.domain.Depalgorithm.core.shortestpath.DijkstraStrategy;
 import com.coffeecode.domain.location.model.Locations;
 import com.coffeecode.domain.route.model.Route;
 
