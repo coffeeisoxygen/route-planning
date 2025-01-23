@@ -13,18 +13,24 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import com.coffeecode.domain.algorithm.api.ShortestPathFinding;
 import com.coffeecode.domain.algorithm.api.SingleSourceShortestPath;
+import com.coffeecode.domain.algorithm.component.PathFindingStats;
+import com.coffeecode.domain.algorithm.result.PathStatistics;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 
 @Component
-public class DijkstraStrategy implements SingleSourceShortestPath, ShortestPathFinding {
+public class DijkstraStrategy implements SingleSourceShortestPath {
 
+    private final PathFindingStats stats;
     private UUID source;
     private Map<UUID, Double> distances;
     private Map<UUID, UUID> predecessors;
     private Map<UUID, Route> pathParent;
+
+    public DijkstraStrategy() {
+        this.stats = new PathFindingStats();
+    }
 
     public UUID getSource() {
         return source;
@@ -73,18 +79,21 @@ public class DijkstraStrategy implements SingleSourceShortestPath, ShortestPathF
 
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
+        stats.startTracking();
         initialize(source);
+
         PriorityQueue<Node> queue = new PriorityQueue<>();
         Set<UUID> visited = new HashSet<>();
 
         queue.offer(new Node(source, 0));
         distances.put(source, 0.0);
-        predecessors.put(source, source);
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
+            stats.incrementVisited();
 
             if (current.id.equals(target)) {
+                stats.stopTracking();
                 return reconstructPath(pathParent, source, target);
             }
 
@@ -93,23 +102,19 @@ public class DijkstraStrategy implements SingleSourceShortestPath, ShortestPathF
             }
             visited.add(current.id);
 
-            for (Route route : map.getRoutes()) {
-                if (!route.sourceId().equals(current.id)) {
-                    continue;
-                }
-
+            for (Route route : map.getActiveRoutes(current.id)) {
                 UUID neighbor = route.targetId();
-                double newDistance = distances.get(current.id) + route.distance();
+                double newDistance = distances.get(current.id) + route.weight();
 
                 if (!distances.containsKey(neighbor) || newDistance < distances.get(neighbor)) {
                     distances.put(neighbor, newDistance);
-                    predecessors.put(neighbor, current.id);
                     pathParent.put(neighbor, route);
                     queue.offer(new Node(neighbor, newDistance));
                 }
             }
         }
 
+        stats.stopTracking();
         return Collections.emptyList();
     }
 
@@ -147,5 +152,10 @@ public class DijkstraStrategy implements SingleSourceShortestPath, ShortestPathF
     @Override
     public String getAlgorithmName() {
         return "Dijkstra's Algorithm";
+    }
+
+    @Override
+    public PathStatistics getLastRunStatistics() {
+        return stats.getLastRunStats();
     }
 }

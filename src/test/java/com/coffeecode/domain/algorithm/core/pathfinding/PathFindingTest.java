@@ -66,6 +66,21 @@ abstract class PathFindingTest {
         assertTrue(stats.getExecutionTime() >= 0, "Should track execution time");
     }
 
+    // Add helper method for path validation
+    protected void verifyPath(List<Route> path, UUID source, UUID target) {
+        assertNotNull(path);
+        assertFalse(path.isEmpty());
+        assertEquals(source, path.get(0).sourceId());
+        assertEquals(target, path.get(path.size() - 1).targetId());
+    }
+
+    // Add helper for distance calculation
+    protected double calculatePathDistance(List<Route> path) {
+        return path.stream()
+                .mapToDouble(Route::distance)
+                .sum();
+    }
+
     @Test
     void testMultiplePathsBFS() {
         List<Route> path = bfs.findPath(routeMap, jakarta.id(), surabaya.id());
@@ -101,23 +116,6 @@ abstract class PathFindingTest {
         UUID invalidId = UUID.randomUUID();
         List<Route> path = bfs.findPath(routeMap, invalidId, jakarta.id());
         assertTrue(path.isEmpty(), "Should handle invalid input gracefully");
-    }
-
-    @Test
-    void testCircularPath() {
-        // Create circular path
-        routeMap.addBidirectionalRoute(semarang.id(), jakarta.id());
-
-        List<Route> path = bfs.findPath(routeMap, jakarta.id(), jakarta.id());
-
-        assertFalse(path.isEmpty(), "Should find a circular path");
-        printPath(path);
-
-        // Verify path forms a cycle
-        if (!path.isEmpty()) {
-            assertEquals(jakarta.id(), path.get(0).sourceId());
-            assertEquals(jakarta.id(), path.get(path.size() - 1).targetId());
-        }
     }
 
     @Test

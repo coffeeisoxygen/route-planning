@@ -14,16 +14,23 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.algorithm.api.SingleSourceShortestPath;
+import com.coffeecode.domain.algorithm.component.PathFindingStats;
+import com.coffeecode.domain.algorithm.result.PathStatistics;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 
 @Component
 public class AStarStrategy implements SingleSourceShortestPath {
 
+    private final PathFindingStats stats;
     private UUID source;
     private Map<UUID, Double> gScore;
-    private Map<UUID, UUID> predecessors;
     private Map<UUID, Route> pathParent;
+    private Map<UUID, UUID> predecessors = new HashMap<>();
+
+    public AStarStrategy() {
+        this.stats = new PathFindingStats();
+    }
 
     public UUID getSource() {
         return source;
@@ -69,7 +76,6 @@ public class AStarStrategy implements SingleSourceShortestPath {
     public void initialize(UUID source) {
         this.source = source;
         this.gScore = new HashMap<>();
-        this.predecessors = new HashMap<>();
         this.pathParent = new HashMap<>();
         this.gScore.computeIfAbsent(source, k -> 0.0);
     }
@@ -81,7 +87,9 @@ public class AStarStrategy implements SingleSourceShortestPath {
 
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
+        stats.startTracking();
         initialize(source);
+
         PriorityQueue<Node> openSet = new PriorityQueue<>();
         Set<UUID> closedSet = new HashSet<>();
 
@@ -89,33 +97,34 @@ public class AStarStrategy implements SingleSourceShortestPath {
 
         while (!openSet.isEmpty()) {
             Node current = openSet.poll();
+            stats.incrementVisited();
 
             if (current.id.equals(target)) {
+                stats.stopTracking();
                 return reconstructPath(pathParent, source, target);
             }
 
             closedSet.add(current.id);
 
-            for (Route route : map.getRoutes()) {
+            for (Route route : map.getActiveRoutes(current.id)) {
                 UUID neighbor = route.targetId();
-                if (!route.sourceId().equals(current.id) || closedSet.contains(neighbor)) {
+                if (closedSet.contains(neighbor)) {
                     continue;
                 }
 
-                double tentativeGScore = gScore.get(current.id) + route.distance();
+                double tentativeG = gScore.getOrDefault(current.id, Double.POSITIVE_INFINITY) + route.weight();
 
-                gScore.computeIfAbsent(neighbor, k -> Double.POSITIVE_INFINITY);
-                if (tentativeGScore < gScore.get(neighbor)) {
-                    gScore.put(neighbor, tentativeGScore);
+                if (tentativeG < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
+                    pathParent.put(neighbor, route);
                     predecessors.put(neighbor, current.id);
                     pathParent.put(neighbor, route);
-
-                    double fScore = tentativeGScore + heuristic(map, neighbor, target);
-                    openSet.offer(new Node(neighbor, tentativeGScore, fScore));
+                    double f = tentativeG + heuristic(map, neighbor, target);
+                    openSet.offer(new Node(neighbor, tentativeG, f));
                 }
             }
         }
 
+        stats.stopTracking();
         return Collections.emptyList();
     }
 
@@ -153,5 +162,10 @@ public class AStarStrategy implements SingleSourceShortestPath {
     @Override
     public String getAlgorithmName() {
         return "A* Search";
+    }
+
+    @Override
+    public PathStatistics getLastRunStatistics() {
+        return stats.getLastRunStats();
     }
 }

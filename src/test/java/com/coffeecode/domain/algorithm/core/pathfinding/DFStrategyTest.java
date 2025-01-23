@@ -51,4 +51,18 @@ class DFStrategyTest extends PathFindingTest {
         assertFalse(path.isEmpty());
         assertTrue(dfs.getLastRunStatistics().visitedNodes() >= path.size());
     }
+
+    @Test
+    void findPath_shouldFollowDepthFirst() {
+        DFSStrategy dfs = new DFSStrategy();
+        routeMap.addBidirectionalRoute(bandung.id(), malang.id());
+        List<Route> path = dfs.findPath(routeMap, jakarta.id(), surabaya.id());
+        
+        verifyPath(path, jakarta.id(), surabaya.id());
+        // Verify DFS behavior by checking if it visits deeper nodes first
+        assertTrue(path.stream()
+            .map(r -> r.targetId())
+            .anyMatch(id -> id.equals(malang.id())),
+            "DFS should explore deeper paths first");
+    }
 }

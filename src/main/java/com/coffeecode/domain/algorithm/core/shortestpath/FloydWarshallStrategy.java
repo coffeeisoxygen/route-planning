@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.algorithm.api.AllPairsShortestPath;
+import com.coffeecode.domain.algorithm.component.PathFindingStats;
+import com.coffeecode.domain.algorithm.result.PathStatistics;
 import com.coffeecode.domain.model.Locations;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
@@ -21,9 +23,14 @@ import com.coffeecode.domain.model.RouteMap;
 @Component
 public class FloydWarshallStrategy implements AllPairsShortestPath {
 
+    private final PathFindingStats stats;
     private Map<UUID, Map<UUID, Double>> distances;
     private Map<UUID, Map<UUID, UUID>> next;
     private UUID source;
+
+    public FloydWarshallStrategy() {
+        this.stats = new PathFindingStats();
+    }
 
     @Override
     public Map<UUID, Map<UUID, Double>> getAllDistances() {
@@ -47,6 +54,7 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
 
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
+        stats.startTracking();
         this.source = source;
         initializeMatrices(map);
 
@@ -54,6 +62,7 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
         for (UUID k : next.keySet()) {
             for (UUID i : next.keySet()) {
                 for (UUID j : next.keySet()) {
+                    stats.incrementVisited();
                     double directDist = distances.get(i).getOrDefault(j, Double.POSITIVE_INFINITY);
                     double pathDist = distances.get(i).getOrDefault(k, Double.POSITIVE_INFINITY)
                             + distances.get(k).getOrDefault(j, Double.POSITIVE_INFINITY);
@@ -66,13 +75,14 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
             }
         }
 
+        stats.stopTracking();
         return reconstructPath(map, source, target);
     }
 
     private void initializeMatrices(RouteMap map) {
         distances = new HashMap<>();
         next = new HashMap<>();
-        
+
         // Get vertices from locations only
         Set<UUID> vertices = new HashSet<>(map.getLocations().stream()
                 .map(Locations::id)
@@ -82,7 +92,7 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
         for (UUID id : vertices) {
             distances.put(id, new HashMap<>());
             next.put(id, new HashMap<>());
-            
+
             for (UUID otherId : vertices) {
                 if (id.equals(otherId)) {
                     distances.get(id).put(otherId, 0.0);
@@ -134,5 +144,10 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
     @Override
     public String getAlgorithmName() {
         return "Floyd-Warshall Algorithm";
+    }
+
+    @Override
+    public PathStatistics getLastRunStatistics() {
+        return stats.getLastRunStats();
     }
 }

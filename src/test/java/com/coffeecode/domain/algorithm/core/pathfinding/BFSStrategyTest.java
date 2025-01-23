@@ -33,4 +33,18 @@ class BFSStrategyTest extends PathFindingTest {
         assertTrue(path.isEmpty());
         assertNotNull(bfs.getLastRunStatistics());
     }
+
+    @Test
+    void findPath_shouldFindShortestPath() {
+        BFSStrategy bfs = new BFSStrategy();
+        List<Route> path = bfs.findPath(routeMap, jakarta.id(), surabaya.id());
+        verifyPath(path, jakarta.id(), surabaya.id());
+        
+        // Add direct route
+        routeMap.addBidirectionalRoute(jakarta.id(), surabaya.id());
+        List<Route> directPath = bfs.findPath(routeMap, jakarta.id(), surabaya.id());
+        
+        assertTrue(calculatePathDistance(directPath) <= calculatePathDistance(path),
+            "BFS should find shortest path available");
+    }
 }
