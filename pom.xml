@@ -24,6 +24,7 @@
     <mockito-inline.version>5.2.0</mockito-inline.version>
     <spring-context.version>6.2.1</spring-context.version>
     <geotools.version>27.2</geotools.version>
+    <slf4jjcl.version>2.0.9</slf4jjcl.version>
 
   </properties>
 
@@ -40,7 +41,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.24</version>
+      <version>1.18.36</version>
       <scope>provided</scope>
     </dependency>
 
@@ -83,6 +84,12 @@
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>${logback.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>${slf4jjcl.version}</version>
     </dependency>
 
     <!-- Testing features -->
@@ -194,14 +201,14 @@
     </plugins>
 
     <resources>
-        <resource>
-            <directory>src/main/resources</directory>
-            <includes>
-                <include>**/*.png</include>
-                <include>**/*.properties</include>
-                <include>**/*.xml</include>
-            </includes>
-        </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>**/*.png</include>
+          <include>**/*.properties</include>
+          <include>**/*.xml</include>
+        </includes>
+      </resource>
     </resources>
 
     <pluginManagement>

@@ -4,7 +4,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
 
-import com.coffeecode.view.map.MapPanel;
+import com.coffeecode.view.map.ui.MapPanel;
 
 public class MainFrame extends JFrame {
 
