@@ -9,14 +9,23 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
 import com.coffeecode.view.map.handler.MapHandler;
+import com.coffeecode.view.map.handler.WaypointHandler;
+import com.coffeecode.view.map.context.MapViewContext;
 
+import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class MapPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
     private final transient MapHandler mapHandler;
+    private final transient WaypointHandler waypointHandler;
 
-    public MapPanel() {
-        this.mapHandler = new MapHandler();
+    @Builder
+    public MapPanel(MapHandler mapHandler) {
+        this.mapHandler = mapHandler;
+        this.waypointHandler = MapViewContext.getInstance().getWaypointHandler();
         initComponents();
     }
 

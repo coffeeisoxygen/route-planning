@@ -4,8 +4,12 @@ import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
 
+import com.coffeecode.view.map.context.MapViewContext;
 import com.coffeecode.view.map.ui.MapPanel;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class MainFrame extends JFrame {
 
     private static final long serialVersionUID = 1L;
@@ -22,8 +26,10 @@ public class MainFrame extends JFrame {
 
         setLayout(new BorderLayout());
 
-        MapPanel mapPanel = new MapPanel();
-        add(mapPanel, BorderLayout.CENTER);  // Changed from EAST to CENTER
+        // Use the singleton context
+        MapViewContext context = MapViewContext.getInstance();
+        MapPanel mapPanel = new MapPanel(context.getMapHandler());
+        add(mapPanel, BorderLayout.CENTER);
     }
 
     public static void main(String[] args) {

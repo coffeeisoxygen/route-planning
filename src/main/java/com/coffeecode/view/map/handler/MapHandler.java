@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@Getter
 public class MapHandler {
 
     // Inner enum definition
@@ -44,29 +43,24 @@ public class MapHandler {
         }
     }
 
+    @Getter
     private final Map<MapType, DefaultTileFactory> tileFactoryCache = new EnumMap<>(MapType.class);
-    private final JXMapViewer mapViewer = initializeMapViewer();
-    private final WaypointHandler waypointHandler = new WaypointHandler(mapViewer);
+    @Getter
+    private final JXMapViewer mapViewer;
     private final MapFileCache mapCache;
 
-    public MapHandler() {
-        this.mapCache = new MapFileCache();
+    public MapHandler(MapFileCache mapCache) {
+        this.mapCache = mapCache;
+        this.mapViewer = initializeMapViewer();
     }
 
     private JXMapViewer initializeMapViewer() {
         log.debug("Initializing map viewer");
         JXMapViewer viewer = new JXMapViewer();
-
-        // Set default OSM tile factory with cache
         viewer.setTileFactory(createTileFactory(new OSMTileFactoryInfo()));
-
-        // Set default zoom and location
         viewer.setZoom(8);
         viewer.setAddressLocation(new GeoPosition(-6.200000, 106.816666));
-
-        // Add interaction handlers
         addDefaultInteractions(viewer);
-
         return viewer;
     }
 
@@ -74,7 +68,6 @@ public class MapHandler {
         log.debug("Creating tile factory for: {}", info.getName());
         DefaultTileFactory factory = new DefaultTileFactory(info);
         factory.setLocalCache(mapCache.getCache());
-        // Optimize loading
         factory.setThreadPoolSize(8);
         return factory;
     }
@@ -89,15 +82,12 @@ public class MapHandler {
 
     public void switchMapType(MapType mapType) {
         log.info("Switching map type to: {}", mapType);
-        // Store current view state
         int zoom = mapViewer.getZoom();
         GeoPosition center = mapViewer.getCenterPosition();
 
-        // Switch tile factory
         DefaultTileFactory factory = tileFactoryCache.computeIfAbsent(mapType, this::createFactoryForType);
         mapViewer.setTileFactory(factory);
 
-        // Restore view state
         mapViewer.setZoom(zoom);
         mapViewer.setAddressLocation(center);
         mapViewer.repaint();
