@@ -14,14 +14,24 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.algorithm.api.PathFinding;
+import com.coffeecode.domain.algorithm.component.PathFindingStats;
+import com.coffeecode.domain.algorithm.result.PathStatistics;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 
 @Component
 public class BFSStrategy implements PathFinding {
 
+    private final PathFindingStats stats;
+
+    public BFSStrategy() {
+        this.stats = new PathFindingStats();
+    }
+
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
+        stats.startTracking();
+
         Queue<UUID> queue = new LinkedList<>();
         Map<UUID, Route> pathParent = new HashMap<>();
         Set<UUID> visited = new HashSet<>();
@@ -30,13 +40,14 @@ public class BFSStrategy implements PathFinding {
 
         while (!queue.isEmpty()) {
             UUID current = queue.poll();
+            stats.incrementVisited();
 
-            // Handle circular path case
-            if (current.equals(target) && (!current.equals(source) || !pathParent.isEmpty())) {
+            if (current.equals(target)) {
+                stats.stopTracking();
                 return reconstructPath(pathParent, source, target);
             }
 
-            for (Route route : map.getOutgoingRoutes(current)) {
+            for (Route route : map.getActiveRoutes(current)) {
                 if (!visited.contains(route.targetId())) {
                     queue.offer(route.targetId());
                     visited.add(route.targetId());
@@ -45,6 +56,7 @@ public class BFSStrategy implements PathFinding {
             }
         }
 
+        stats.stopTracking();
         return Collections.emptyList();
     }
 
@@ -59,6 +71,11 @@ public class BFSStrategy implements PathFinding {
         }
 
         return path;
+    }
+
+    @Override
+    public PathStatistics getLastRunStatistics() {
+        return stats.getLastRunStats();
     }
 
     @Override

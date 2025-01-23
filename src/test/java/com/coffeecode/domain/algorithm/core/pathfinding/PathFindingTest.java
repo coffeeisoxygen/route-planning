@@ -12,25 +12,23 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.coffeecode.domain.algorithm.api.PathFinding;
 import com.coffeecode.domain.model.Locations;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 import com.coffeecode.infrastructure.distance.GeoToolsCalculator;
 
-class PathFindingTest {
+abstract class PathFindingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PathFindingTest.class);
 
-    private RouteMap routeMap;
-    private BFSStrategy bfs;
-    private DFStrategy dfs;
-    private Locations jakarta, bandung, surabaya, semarang, yogyakarta, malang;
+    protected RouteMap routeMap;
+    protected Locations jakarta, bandung, surabaya, semarang, yogyakarta, malang;
+    protected PathFinding bfs, dfs;
 
     @BeforeEach
     void setUp() {
         routeMap = new RouteMap(new GeoToolsCalculator());
-        bfs = new BFSStrategy();
-        dfs = new DFStrategy();
 
         // Create test locations
         jakarta = new Locations("Jakarta", -6.200000, 106.816666);
@@ -54,7 +52,18 @@ class PathFindingTest {
         routeMap.addBidirectionalRoute(bandung.id(), yogyakarta.id());
         routeMap.addBidirectionalRoute(semarang.id(), surabaya.id());
         routeMap.addBidirectionalRoute(yogyakarta.id(), surabaya.id());
-        routeMap.addBidirectionalRoute(surabaya.id(), malang.id());
+        bfs = new BFSStrategy();
+        dfs = new DFSStrategy();
+    }
+
+    protected void verifyPathResult(List<Route> path, PathFinding algorithm) {
+        assertNotNull(path, "Path should not be null");
+        assertFalse(path.isEmpty(), "Path should not be empty");
+
+        var stats = algorithm.getLastRunStatistics();
+        assertNotNull(stats, "Statistics should be tracked");
+        assertTrue(stats.visitedNodes() > 0, "Should visit nodes");
+        assertTrue(stats.getExecutionTime() >= 0, "Should track execution time");
     }
 
     @Test

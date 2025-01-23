@@ -15,34 +15,43 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.algorithm.api.PathFinding;
+import com.coffeecode.domain.algorithm.component.PathFindingStats;
+import com.coffeecode.domain.algorithm.result.PathStatistics;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 
 @Component
-public class DFStrategy implements PathFinding {
+public class DFSStrategy implements PathFinding {
+
+    private final PathFindingStats stats;
+
+    public DFSStrategy() {
+        this.stats = new PathFindingStats();
+    }
 
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
+        stats.startTracking();
+
         Deque<UUID> stack = new ArrayDeque<>();
         Map<UUID, Route> pathParent = new HashMap<>();
         Set<UUID> visited = new HashSet<>();
 
         stack.push(source);
         visited.add(source);
-        boolean foundTarget = false;
 
-        while (!stack.isEmpty() && !foundTarget) {
+        while (!stack.isEmpty()) {
             UUID current = stack.peek();
+            stats.incrementVisited();
 
             if (current.equals(target)) {
-                foundTarget = true;
-                continue;
+                stats.stopTracking();
+                return reconstructPath(pathParent, source, target);
             }
 
-            Optional<Route> nextRoute = map.getRoutes().stream()
-                    .filter(r -> r.sourceId().equals(current))
+            Optional<Route> nextRoute = map.getActiveRoutes(current).stream()
                     .filter(r -> !visited.contains(r.targetId()))
-                    .min((r1, r2) -> Double.compare(r1.distance(), r2.distance()));
+                    .findFirst();
 
             if (nextRoute.isPresent()) {
                 UUID next = nextRoute.get().targetId();
@@ -54,11 +63,8 @@ public class DFStrategy implements PathFinding {
             }
         }
 
-        if (!foundTarget) {
-            return Collections.emptyList();
-        }
-
-        return reconstructPath(pathParent, source, target);
+        stats.stopTracking();
+        return Collections.emptyList();
     }
 
     private List<Route> reconstructPath(Map<UUID, Route> pathParent, UUID source, UUID target) {
@@ -72,6 +78,11 @@ public class DFStrategy implements PathFinding {
         }
 
         return path;
+    }
+
+    @Override
+    public PathStatistics getLastRunStatistics() {
+        return stats.getLastRunStats();
     }
 
     @Override

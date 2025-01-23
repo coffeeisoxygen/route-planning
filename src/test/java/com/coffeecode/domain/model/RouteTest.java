@@ -76,13 +76,14 @@ class RouteTest {
 
     @Test
     void builder_withSameSourceAndTarget_shouldThrowException() {
-        assertThrows(IllegalArgumentException.class, ()
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, ()
                 -> Route.builder()
                         .sourceId(source)
                         .targetId(source)
                         .distance(validDistance)
                         .type(Route.RouteType.DIRECT)
                         .build());
+        assertEquals("Source and target cannot be the same", exception.getMessage());
     }
 
     @Test
