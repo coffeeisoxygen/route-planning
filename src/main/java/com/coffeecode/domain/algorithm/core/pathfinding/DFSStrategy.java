@@ -17,8 +17,8 @@ import com.coffeecode.domain.algorithm.api.PathFinding;
 import com.coffeecode.domain.algorithm.api.SearchNode;
 import com.coffeecode.domain.algorithm.result.PathFindingStats;
 import com.coffeecode.domain.algorithm.result.ExecutionStatistics;
-import com.coffeecode.domain.route.RouteMap;
 import com.coffeecode.domain.route.model.Route;
+import com.coffeecode.domain.route.model.RouteMap;
 
 @Component
 public class DFSStrategy implements PathFinding {

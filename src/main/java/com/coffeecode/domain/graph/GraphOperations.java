@@ -3,14 +3,21 @@ package com.coffeecode.domain.graph;
 import java.util.*;
 
 import com.coffeecode.domain.route.builder.RouteBuilder;
+import com.coffeecode.domain.route.factory.RouteFactory;
 import com.coffeecode.domain.route.model.*;
+import com.coffeecode.domain.location.util.GeoToolsCalculator;
+import com.coffeecode.domain.location.service.LocationMap;
 
 public class GraphOperations {
 
     private final Graph graph;
+    private final GeoToolsCalculator calculator;
+    private final LocationMap locationMap;
 
-    public GraphOperations(Graph graph) {
+    public GraphOperations(Graph graph, GeoToolsCalculator calculator, LocationMap locationMap) {
         this.graph = graph;
+        this.calculator = calculator;
+        this.locationMap = locationMap;
     }
 
     // Core Graph Operations
@@ -53,6 +60,26 @@ public class GraphOperations {
         return graph.hasEdge(source, target);
     }
 
+    public void addBidirectionalRoute(UUID source, UUID target) {
+        double distance = calculateDistance(source, target);
+        Route[] routes = RouteFactory.createBidirectional(source, target, distance, RouteType.DEFAULT);
+        for (Route route : routes) {
+            graph.addEdge(route);
+        }
+    }
+
+    private double calculateDistance(UUID source, UUID target) {
+        var sourceLocation = locationMap.getLocation(source)
+                .orElseThrow(() -> new IllegalArgumentException("Source location not found"));
+        var targetLocation = locationMap.getLocation(target)
+                .orElseThrow(() -> new IllegalArgumentException("Target location not found"));
+
+        return calculator.calculateDistance(
+                sourceLocation.latitude(), sourceLocation.longitude(),
+                targetLocation.latitude(), targetLocation.longitude()
+        );
+    }
+
     // Path Operations
     public boolean isValidPath(List<Route> path) {
         if (path == null || path.isEmpty()) {
@@ -84,5 +111,9 @@ public class GraphOperations {
         return graph.getOutgoingEdges(source).stream()
                 .filter(r -> r.targetId().equals(target))
                 .min(Comparator.comparingDouble(Route::weight));
+    }
+
+    public void clear() {
+        graph.clear();
     }
 }

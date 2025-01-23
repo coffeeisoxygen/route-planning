@@ -5,7 +5,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import com.coffeecode.domain.location.util.DistanceCalculator;
-import com.coffeecode.domain.route.RouteMap;
+import com.coffeecode.domain.route.model.RouteMap;
 import com.coffeecode.application.port.output.LocationPersistancePort;
 import com.coffeecode.application.service.LocationServiceImpl;
 import com.coffeecode.application.service.RouteServiceImpl;

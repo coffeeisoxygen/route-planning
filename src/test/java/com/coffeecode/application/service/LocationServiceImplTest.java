@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.coffeecode.application.port.output.LocationPersistancePort;
 import com.coffeecode.domain.location.model.Locations;
-import com.coffeecode.domain.route.RouteMap;
+import com.coffeecode.domain.route.model.RouteMap;
 
 @ExtendWith(MockitoExtension.class)
 class LocationServiceImplTest {

@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.UUID;
 
 import com.coffeecode.domain.algorithm.result.ExecutionStatistics;
-import com.coffeecode.domain.route.RouteMap;
 import com.coffeecode.domain.route.model.Route;
+import com.coffeecode.domain.route.model.RouteMap;
 
 public interface PathFinding {
 

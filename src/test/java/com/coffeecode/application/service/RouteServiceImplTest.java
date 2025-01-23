@@ -15,8 +15,8 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.coffeecode.domain.exception.RouteNotFoundException;
-import com.coffeecode.domain.route.RouteMap;
 import com.coffeecode.domain.route.model.Route;
+import com.coffeecode.domain.route.model.RouteMap;
 
 @ExtendWith(MockitoExtension.class)
 class RouteServiceImplTest {

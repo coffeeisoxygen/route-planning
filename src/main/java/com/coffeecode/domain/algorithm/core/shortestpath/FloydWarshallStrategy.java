@@ -16,8 +16,8 @@ import com.coffeecode.domain.algorithm.api.AllPairsShortestPath;
 import com.coffeecode.domain.algorithm.result.PathFindingStats;
 import com.coffeecode.domain.location.model.Locations;
 import com.coffeecode.domain.algorithm.result.ExecutionStatistics;
-import com.coffeecode.domain.route.RouteMap;
 import com.coffeecode.domain.route.model.Route;
+import com.coffeecode.domain.route.model.RouteMap;
 
 @Component
 public class FloydWarshallStrategy implements AllPairsShortestPath {

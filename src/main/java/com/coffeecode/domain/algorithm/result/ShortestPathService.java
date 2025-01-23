@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import com.coffeecode.domain.algorithm.api.PathFinding;
-import com.coffeecode.domain.route.RouteMap;
 import com.coffeecode.domain.route.model.Route;
+import com.coffeecode.domain.route.model.RouteMap;
 
 @Service
 public class ShortestPathService {
