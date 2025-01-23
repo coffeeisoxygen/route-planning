@@ -78,39 +78,45 @@ public class PathFindingAlgorithmTest {
     void testNoPathExists() {
         Locations bali = new Locations("Bali", -8.409518, 115.188919);
         routeMap.addLocation(bali);
-        
+
         List<Route> bfsPath = bfs.findPath(routeMap, jakarta.id(), bali.id());
         List<Route> dfsPath = dfs.findPath(routeMap, jakarta.id(), bali.id());
-        
+
         assertTrue(bfsPath.isEmpty(), "BFS should return empty path");
         assertTrue(dfsPath.isEmpty(), "DFS should return empty path");
     }
 
     @Test
     void testCircularPath() {
-        // Create circular route
+        // Setup triangle route
         routeMap.addBidirectionalRoute(surabaya.id(), jakarta.id());
         
         List<Route> bfsPath = bfs.findPath(routeMap, jakarta.id(), jakarta.id());
         List<Route> dfsPath = dfs.findPath(routeMap, jakarta.id(), jakarta.id());
         
-        // Changed assertion - path should exist
+        // Assert paths exist
         assertTrue(!bfsPath.isEmpty(), "BFS should find circular path");
         assertTrue(!dfsPath.isEmpty(), "DFS should find circular path");
         
-        // Verify start/end points match
-        if (!bfsPath.isEmpty()) {
-            assertEquals(jakarta.id(), bfsPath.get(0).sourceId());
-            assertEquals(jakarta.id(), bfsPath.get(bfsPath.size()-1).targetId());
-            System.out.println("BFS Circular Path:");
-            printPath(bfsPath);
-        }
+        // Verify path properties
+        verifyCircularPath(bfsPath, "BFS");
+        verifyCircularPath(dfsPath, "DFS");
+    }
 
-        if (!dfsPath.isEmpty()) {
-            assertEquals(jakarta.id(), dfsPath.get(0).sourceId());
-            assertEquals(jakarta.id(), dfsPath.get(dfsPath.size()-1).targetId());
-            System.out.println("DFS Circular Path:");
-            printPath(dfsPath);
+    private void verifyCircularPath(List<Route> path, String algorithm) {
+        if (!path.isEmpty()) {
+            assertEquals(jakarta.id(), path.get(0).sourceId(), 
+                algorithm + " path should start at Jakarta");
+            assertEquals(jakarta.id(), path.get(path.size()-1).targetId(), 
+                algorithm + " path should end at Jakarta");
+            
+            System.out.println(algorithm + " Circular Path:");
+            printPath(path);
+            
+            var stats = algorithm.equals("BFS") ? 
+                bfs.getLastRunStatistics() : 
+                dfs.getLastRunStatistics();
+            System.out.println(algorithm + " visited nodes: " + stats.visitedNodes());
         }
     }
 
@@ -120,10 +126,10 @@ public class PathFindingAlgorithmTest {
         routeMap.addLocation(semarang);
         routeMap.addBidirectionalRoute(jakarta.id(), semarang.id());
         routeMap.addBidirectionalRoute(semarang.id(), surabaya.id());
-        
+
         List<Route> bfsPath = bfs.findPath(routeMap, jakarta.id(), surabaya.id());
         List<Route> dfsPath = dfs.findPath(routeMap, jakarta.id(), surabaya.id());
-        
+
         assertFalse(bfsPath.isEmpty());
         assertFalse(dfsPath.isEmpty());
     }
@@ -133,7 +139,7 @@ public class PathFindingAlgorithmTest {
         UUID invalidId = UUID.randomUUID();
         List<Route> bfsPath = bfs.findPath(routeMap, invalidId, jakarta.id());
         List<Route> dfsPath = dfs.findPath(routeMap, invalidId, jakarta.id());
-        
+
         assertTrue(bfsPath.isEmpty());
         assertTrue(dfsPath.isEmpty());
     }
@@ -142,13 +148,13 @@ public class PathFindingAlgorithmTest {
     void testPerformanceComparison() {
         bfs.findPath(routeMap, jakarta.id(), surabaya.id());
         PathStatistics bfsStats = bfs.getLastRunStatistics();
-        
+
         dfs.findPath(routeMap, jakarta.id(), surabaya.id());
         PathStatistics dfsStats = dfs.getLastRunStatistics();
-        
+
         assertTrue(bfsStats.visitedNodes() > 0, "BFS should visit at least one node");
         assertTrue(dfsStats.visitedNodes() > 0, "DFS should visit at least one node");
-        
+
         System.out.println("BFS visited nodes: " + bfsStats.visitedNodes());
         System.out.println("DFS visited nodes: " + dfsStats.visitedNodes());
     }
