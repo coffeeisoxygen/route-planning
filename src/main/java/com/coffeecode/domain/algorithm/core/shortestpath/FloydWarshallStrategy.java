@@ -38,7 +38,6 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
         this.source = source;
         initializeMatrices(map);
 
-        // Floyd-Warshall algorithm
         for (UUID k : vertices) {
             for (UUID i : vertices) {
                 for (UUID j : vertices) {
@@ -52,25 +51,13 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
         return reconstructPath(map, source, target);
     }
 
-    private void updateDistance(UUID i, UUID j, UUID k) {
-        double directDist = distances.get(i).getOrDefault(j, Double.POSITIVE_INFINITY);
-        double pathDist = distances.get(i).getOrDefault(k, Double.POSITIVE_INFINITY)
-                + distances.get(k).getOrDefault(j, Double.POSITIVE_INFINITY);
-
-        if (pathDist < directDist) {
-            distances.get(i).put(j, pathDist);
-            next.get(i).put(j, next.get(i).get(k));
-        }
-    }
-
     private void initializeMatrices(RouteMap map) {
-        this.distances = new HashMap<>();
-        this.next = new HashMap<>();
-        this.vertices = map.getLocations().stream()
+        distances = new HashMap<>();
+        next = new HashMap<>();
+        vertices = map.getLocations().stream()
                 .map(Locations::id)
                 .collect(Collectors.toSet());
 
-        // Initialize matrices
         for (UUID id : vertices) {
             distances.put(id, new HashMap<>());
             next.put(id, new HashMap<>());
@@ -86,21 +73,25 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
             }
         }
 
-        // Add active routes
-        for (Route route : map.getActiveRoutes(source)) {
-            if (isValidVertex(route.sourceId()) && isValidVertex(route.targetId())) {
-                updateMatrix(route);
+        for (UUID id : vertices) {
+            for (Route route : map.getRoutesFrom(id)) {
+                if (route.isActive()) {
+                    distances.get(id).put(route.targetId(), route.distance());
+                    next.get(id).put(route.targetId(), route.targetId());
+                }
             }
         }
     }
 
-    private boolean isValidVertex(UUID id) {
-        return vertices.contains(id);
-    }
+    private void updateDistance(UUID i, UUID j, UUID k) {
+        double directDist = distances.get(i).getOrDefault(j, Double.POSITIVE_INFINITY);
+        double pathDist = distances.get(i).getOrDefault(k, Double.POSITIVE_INFINITY)
+                + distances.get(k).getOrDefault(j, Double.POSITIVE_INFINITY);
 
-    private void updateMatrix(Route route) {
-        distances.get(route.sourceId()).put(route.targetId(), route.weight());
-        next.get(route.sourceId()).put(route.targetId(), route.targetId());
+        if (pathDist < directDist) {
+            distances.get(i).put(j, pathDist);
+            next.get(i).put(j, next.get(i).get(k));
+        }
     }
 
     private List<Route> reconstructPath(RouteMap map, UUID source, UUID target) {
@@ -146,18 +137,19 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
     }
 
     @Override
+    public PathStatistics getLastRunStatistics() {
+        return stats.getLastRunStats();
+    }
+
+    @Override
     public Map<UUID, Double> getDistances() {
-        return Collections.unmodifiableMap(distances.get(source));
+        return distances.getOrDefault(source, Collections.emptyMap());
     }
 
     @Override
     public double getPathCost(UUID target) {
-        return distances.get(source).getOrDefault(target, Double.POSITIVE_INFINITY);
-    }
-
-    @Override
-    public PathStatistics getLastRunStatistics() {
-        return stats.getLastRunStats();
+        return distances.getOrDefault(source, Collections.emptyMap())
+                .getOrDefault(target, Double.POSITIVE_INFINITY);
     }
 
     @Override
