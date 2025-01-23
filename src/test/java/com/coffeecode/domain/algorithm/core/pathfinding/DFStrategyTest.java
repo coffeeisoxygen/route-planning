@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.coffeecode.domain.model.Locations;
@@ -13,9 +14,15 @@ import com.coffeecode.domain.model.Route;
 
 class DFStrategyTest extends PathFindingTest {
 
+    private DFSStrategy dfs;
+
+    @BeforeEach
+    void initDFS() {
+        dfs = new DFSStrategy();
+    }
+
     @Test
     void findPath_shouldFindCorrectPath() {
-        DFSStrategy dfs = new DFSStrategy();
         List<Route> path = dfs.findPath(routeMap, jakarta.id(), surabaya.id());
 
         verifyPathResult(path, dfs);
@@ -29,7 +36,6 @@ class DFStrategyTest extends PathFindingTest {
 
     @Test
     void findPath_noPath_shouldReturnEmpty() {
-        DFSStrategy dfs = new DFSStrategy();
         Locations bali = new Locations("Bali", -8.409518, 115.188919);
         routeMap.addLocation(bali);
 
@@ -43,7 +49,6 @@ class DFStrategyTest extends PathFindingTest {
 
     @Test
     void findPath_circularPath_shouldFindPath() {
-        DFSStrategy dfs = new DFSStrategy();
         routeMap.addBidirectionalRoute(surabaya.id(), jakarta.id());
 
         List<Route> path = dfs.findPath(routeMap, jakarta.id(), surabaya.id());
@@ -54,15 +59,37 @@ class DFStrategyTest extends PathFindingTest {
 
     @Test
     void findPath_shouldFollowDepthFirst() {
-        DFSStrategy dfs = new DFSStrategy();
         routeMap.addBidirectionalRoute(bandung.id(), malang.id());
         List<Route> path = dfs.findPath(routeMap, jakarta.id(), surabaya.id());
-        
+
         verifyPath(path, jakarta.id(), surabaya.id());
         // Verify DFS behavior by checking if it visits deeper nodes first
         assertTrue(path.stream()
-            .map(r -> r.targetId())
-            .anyMatch(id -> id.equals(malang.id())),
-            "DFS should explore deeper paths first");
+                .map(r -> r.targetId())
+                .anyMatch(id -> id.equals(malang.id())),
+                "DFS should explore deeper paths first");
+    }
+
+    @Test
+    void shouldExploreInDepthFirstOrder() {
+        routeMap.addBidirectionalRoute(bandung.id(), malang.id());
+        List<Route> path = dfs.findPath(routeMap, jakarta.id(), surabaya.id());
+
+        verifyPath(path, jakarta.id(), surabaya.id());
+        assertTrue(path.stream()
+                .map(Route::targetId)
+                .anyMatch(id -> id.equals(malang.id())),
+                "DFS should explore deeper paths first");
+    }
+
+    @Test
+    void shouldHandleBacktracking() {
+        // Create dead-end path
+        routeMap.addBidirectionalRoute(bandung.id(), malang.id());
+        List<Route> path = dfs.findPath(routeMap, jakarta.id(), surabaya.id());
+
+        assertFalse(path.isEmpty());
+        assertTrue(dfs.getLastRunStatistics().visitedNodes() > path.size(),
+                "Should show evidence of backtracking");
     }
 }

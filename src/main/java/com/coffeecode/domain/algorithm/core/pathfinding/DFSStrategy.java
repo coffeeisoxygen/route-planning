@@ -8,13 +8,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.algorithm.api.PathFinding;
+import com.coffeecode.domain.algorithm.api.SearchNode;
 import com.coffeecode.domain.algorithm.component.PathFindingStats;
 import com.coffeecode.domain.algorithm.result.PathStatistics;
 import com.coffeecode.domain.model.Route;
@@ -29,36 +29,62 @@ public class DFSStrategy implements PathFinding {
         this.stats = new PathFindingStats();
     }
 
+    private static class Node implements SearchNode {
+
+        private final UUID id;
+        private final int depth;
+
+        Node(UUID id, int depth) {
+            this.id = id;
+            this.depth = depth;
+        }
+
+        @Override
+        public UUID getId() {
+            return id;
+        }
+
+        @Override
+        public double getScore() {
+            return -depth;
+        } // Inverse for DFS ordering
+    }
+
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
         stats.startTracking();
 
-        Deque<UUID> stack = new ArrayDeque<>();
+        Deque<Node> stack = new ArrayDeque<>();
         Map<UUID, Route> pathParent = new HashMap<>();
         Set<UUID> visited = new HashSet<>();
 
-        stack.push(source);
+        stack.push(new Node(source, 0));
         visited.add(source);
 
         while (!stack.isEmpty()) {
-            UUID current = stack.peek();
+            Node current = stack.peek();
             stats.incrementVisited();
 
-            if (current.equals(target)) {
+            if (current.getId().equals(target)) {
                 stats.stopTracking();
                 return reconstructPath(pathParent, source, target);
             }
 
-            Optional<Route> nextRoute = map.getActiveRoutes(current).stream()
+            List<Route> nextRoutes = map.getActiveRoutes(current.getId()).stream()
                     .filter(r -> !visited.contains(r.targetId()))
-                    .findFirst();
+                    .toList();
 
-            if (nextRoute.isPresent()) {
-                UUID next = nextRoute.get().targetId();
-                stack.push(next);
-                visited.add(next);
-                pathParent.put(next, nextRoute.get());
-            } else {
+            boolean hasUnvisitedNeighbors = false;
+            for (Route route : nextRoutes) {
+                UUID nextId = route.targetId();
+                if (!visited.contains(nextId)) {
+                    stack.push(new Node(nextId, current.depth + 1));
+                    visited.add(nextId);
+                    pathParent.put(nextId, route);
+                    hasUnvisitedNeighbors = true;
+                }
+            }
+            if (!hasUnvisitedNeighbors) {
                 stack.pop();
             }
         }
@@ -89,4 +115,5 @@ public class DFSStrategy implements PathFinding {
     public String getAlgorithmName() {
         return "Depth First Search";
     }
+
 }

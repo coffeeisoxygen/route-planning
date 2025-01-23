@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.coffeecode.domain.algorithm.api.SearchNode;
 import com.coffeecode.domain.algorithm.api.SingleSourceShortestPath;
 import com.coffeecode.domain.algorithm.component.PathFindingStats;
 import com.coffeecode.domain.algorithm.result.PathStatistics;
@@ -36,10 +36,10 @@ public class DijkstraStrategy implements SingleSourceShortestPath {
         return source;
     }
 
-    private static class Node implements Comparable<Node> {
+    private static class Node implements SearchNode {
 
-        UUID id;
-        double distance;
+        private final UUID id;
+        private final double distance;
 
         Node(UUID id, double distance) {
             this.id = id;
@@ -47,25 +47,13 @@ public class DijkstraStrategy implements SingleSourceShortestPath {
         }
 
         @Override
-        public int compareTo(Node other) {
-            return Double.compare(distance, other.distance);
+        public UUID getId() {
+            return id;
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null || getClass() != obj.getClass()) {
-                return false;
-            }
-            Node node = (Node) obj;
-            return Double.compare(node.distance, distance) == 0 && id.equals(node.id);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, distance);
+        public double getScore() {
+            return distance;
         }
     }
 
@@ -106,7 +94,12 @@ public class DijkstraStrategy implements SingleSourceShortestPath {
                 UUID neighbor = route.targetId();
                 double newDistance = distances.get(current.id) + route.weight();
 
-                if (!distances.containsKey(neighbor) || newDistance < distances.get(neighbor)) {
+                distances.computeIfAbsent(neighbor, k -> {
+                    pathParent.put(neighbor, route);
+                    queue.offer(new Node(neighbor, newDistance));
+                    return newDistance;
+                });
+                if (newDistance < distances.get(neighbor)) {
                     distances.put(neighbor, newDistance);
                     pathParent.put(neighbor, route);
                     queue.offer(new Node(neighbor, newDistance));

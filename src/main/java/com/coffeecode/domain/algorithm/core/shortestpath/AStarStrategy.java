@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
+import com.coffeecode.domain.algorithm.api.SearchNode;
 import com.coffeecode.domain.algorithm.api.SingleSourceShortestPath;
 import com.coffeecode.domain.algorithm.component.PathFindingStats;
 import com.coffeecode.domain.algorithm.result.PathStatistics;
@@ -36,11 +36,11 @@ public class AStarStrategy implements SingleSourceShortestPath {
         return source;
     }
 
-    private static class Node implements Comparable<Node> {
+    private static class Node implements SearchNode {
 
-        UUID id;
-        double gScore;
-        double fScore;
+        private final UUID id;
+        private final double gScore;
+        private final double fScore;
 
         Node(UUID id, double gScore, double fScore) {
             this.id = id;
@@ -49,27 +49,18 @@ public class AStarStrategy implements SingleSourceShortestPath {
         }
 
         @Override
-        public int compareTo(Node other) {
-            return Double.compare(fScore, other.fScore);
+        public UUID getId() {
+            return id;
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null || getClass() != obj.getClass()) {
-                return false;
-            }
-            Node node = (Node) obj;
-            return Objects.equals(id, node.id);
+        public double getScore() {
+            return fScore;
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(id);
+        public double getGScore() {
+            return gScore;
         }
-
     }
 
     @Override
@@ -117,7 +108,6 @@ public class AStarStrategy implements SingleSourceShortestPath {
                 if (tentativeG < gScore.getOrDefault(neighbor, Double.POSITIVE_INFINITY)) {
                     pathParent.put(neighbor, route);
                     predecessors.put(neighbor, current.id);
-                    pathParent.put(neighbor, route);
                     double f = tentativeG + heuristic(map, neighbor, target);
                     openSet.offer(new Node(neighbor, tentativeG, f));
                 }

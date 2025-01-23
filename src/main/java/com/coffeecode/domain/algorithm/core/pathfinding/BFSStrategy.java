@@ -14,6 +14,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import com.coffeecode.domain.algorithm.api.PathFinding;
+import com.coffeecode.domain.algorithm.api.SearchNode;
 import com.coffeecode.domain.algorithm.component.PathFindingStats;
 import com.coffeecode.domain.algorithm.result.PathStatistics;
 import com.coffeecode.domain.model.Route;
@@ -28,30 +29,53 @@ public class BFSStrategy implements PathFinding {
         this.stats = new PathFindingStats();
     }
 
+    private static class Node implements SearchNode {
+
+        private final UUID id;
+        private final int depth;  // For level tracking
+
+        Node(UUID id, int depth) {
+            this.id = id;
+            this.depth = depth;
+        }
+
+        @Override
+        public UUID getId() {
+            return id;
+        }
+
+        @Override
+        public double getScore() {
+            return depth;
+        }
+    }
+
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
         stats.startTracking();
 
-        Queue<UUID> queue = new LinkedList<>();
+        Queue<Node> queue = new LinkedList<>();
         Map<UUID, Route> pathParent = new HashMap<>();
         Set<UUID> visited = new HashSet<>();
 
-        queue.offer(source);
+        queue.offer(new Node(source, 0));
+        visited.add(source);
 
         while (!queue.isEmpty()) {
-            UUID current = queue.poll();
+            Node current = queue.poll();
             stats.incrementVisited();
 
-            if (current.equals(target)) {
+            if (current.getId().equals(target)) {
                 stats.stopTracking();
                 return reconstructPath(pathParent, source, target);
             }
 
-            for (Route route : map.getActiveRoutes(current)) {
-                if (!visited.contains(route.targetId())) {
-                    queue.offer(route.targetId());
-                    visited.add(route.targetId());
-                    pathParent.put(route.targetId(), route);
+            for (Route route : map.getActiveRoutes(current.getId())) {
+                UUID nextId = route.targetId();
+                if (!visited.contains(nextId)) {
+                    queue.offer(new Node(nextId, current.depth + 1));
+                    visited.add(nextId);
+                    pathParent.put(nextId, route);
                 }
             }
         }
@@ -82,4 +106,5 @@ public class BFSStrategy implements PathFinding {
     public String getAlgorithmName() {
         return "Breadth First Search";
     }
+
 }

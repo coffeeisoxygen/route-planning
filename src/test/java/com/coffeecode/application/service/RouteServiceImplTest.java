@@ -1,17 +1,17 @@
 package com.coffeecode.application.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.coffeecode.domain.exception.RouteNotFoundException;
@@ -36,7 +36,8 @@ class RouteServiceImplTest {
 
     @Test
     void getRoute_whenExists_shouldReturnRoute() {
-        Route expectedRoute = new Route(source, target, 100.0, Route.RouteType.DIRECT);
+        Route expectedRoute = new Route(source, target, 100.0, 100.0, Route.RouteStatus.ACTIVE,
+                new Route.RouteMetadata(0L, 0L, ""), Route.RouteType.DIRECT);
         when(routeMap.getRoute(source, target)).thenReturn(Optional.of(expectedRoute));
 
         Route result = routeService.getRoute(source, target);
@@ -48,15 +49,14 @@ class RouteServiceImplTest {
     void getRoute_whenNotExists_shouldThrowException() {
         when(routeMap.getRoute(source, target)).thenReturn(Optional.empty());
 
-        assertThrows(RouteNotFoundException.class, ()
-                -> routeService.getRoute(source, target));
+        assertThrows(RouteNotFoundException.class, () -> routeService.getRoute(source, target));
     }
 
     @Test
     void getAllRoutes_shouldReturnAllRoutes() {
         Collection<Route> expectedRoutes = List.of(
-                new Route(source, target, 100.0, Route.RouteType.DIRECT)
-        );
+                new Route(source, target, 100.0, 100.0, Route.RouteStatus.ACTIVE, new Route.RouteMetadata(0L, 0L, ""),
+                        Route.RouteType.DIRECT));
         when(routeMap.getRoutes()).thenReturn(expectedRoutes);
 
         Collection<Route> result = routeService.getAllRoutes();

@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,96 +80,7 @@ abstract class PathFindingTest {
                 .sum();
     }
 
-    @Test
-    void testMultiplePathsBFS() {
-        List<Route> path = bfs.findPath(routeMap, jakarta.id(), surabaya.id());
-        assertFalse(path.isEmpty(), "Should find a path");
-        logger.info("BFS Path (Multiple Options):");
-        printPath(path);
-    }
-
-    @Test
-    void testMultiplePathsDFS() {
-        List<Route> path = dfs.findPath(routeMap, jakarta.id(), surabaya.id());
-        assertFalse(path.isEmpty(), "Should find a path");
-        logger.info("DFS Path (Multiple Options):");
-        printPath(path);
-    }
-
-    @Test
-    void testNoPathScenario() {
-        // Create isolated location
-        Locations bali = new Locations("Bali", -8.409518, 115.188919);
-        routeMap.addLocation(bali);
-
-        List<Route> bfsPath = bfs.findPath(routeMap, jakarta.id(), bali.id());
-        List<Route> dfsPath = dfs.findPath(routeMap, jakarta.id(), bali.id());
-
-        assertTrue(bfsPath.isEmpty(), "BFS should return empty path");
-        assertTrue(dfsPath.isEmpty(), "DFS should return empty path");
-        logger.info("No path found test passed");
-    }
-
-    @Test
-    void testInvalidInput() {
-        UUID invalidId = UUID.randomUUID();
-        List<Route> path = bfs.findPath(routeMap, invalidId, jakarta.id());
-        assertTrue(path.isEmpty(), "Should handle invalid input gracefully");
-    }
-
-    @Test
-    void testIntermediateCities() {
-        // Remove direct route if exists
-        routeMap.removeRoute(jakarta.id(), surabaya.id());
-        routeMap.removeRoute(surabaya.id(), jakarta.id());
-
-        // Force path through Yogyakarta
-        routeMap.removeRoute(semarang.id(), surabaya.id());
-
-        List<Route> pathThroughYogyakarta = bfs.findPath(routeMap, jakarta.id(), surabaya.id());
-
-        boolean containsYogyakarta = pathThroughYogyakarta.stream()
-                .anyMatch(r -> getLocationName(r.sourceId()).equals("Yogyakarta")
-                || getLocationName(r.targetId()).equals("Yogyakarta"));
-
-        logger.info("Path through intermediate cities:");
-        printPath(pathThroughYogyakarta);
-        assertTrue(containsYogyakarta, "Path should include Yogyakarta");
-        assertFalse(pathThroughYogyakarta.isEmpty(), "Should find a path");
-    }
-
-    @Test
-    void testAlternativePaths() {
-        // Add alternative route with longer distance
-        routeMap.addBidirectionalRoute(jakarta.id(), surabaya.id());
-        List<Route> bfsPath = bfs.findPath(routeMap, jakarta.id(), surabaya.id());
-        List<Route> dfsPath = dfs.findPath(routeMap, jakarta.id(), surabaya.id());
-
-        logger.info("BFS Alternative Path:");
-        printPath(bfsPath);
-        logger.info("DFS Alternative Path:");
-        printPath(dfsPath);
-
-        assertNotNull(bfsPath);
-        assertNotNull(dfsPath);
-    }
-
-    @Test
-    void testPerformance() {
-        long startTime = System.nanoTime();
-        bfs.findPath(routeMap, jakarta.id(), malang.id());
-        long bfsTime = System.nanoTime() - startTime;
-
-        startTime = System.nanoTime();
-        dfs.findPath(routeMap, jakarta.id(), malang.id());
-        long dfsTime = System.nanoTime() - startTime;
-
-        logger.info("Performance Test:");
-        logger.info("BFS time: {} ms", bfsTime / 1_000_000.0);
-        logger.info("DFS time: {} ms", dfsTime / 1_000_000.0);
-    }
-
-    private void printPath(List<Route> path) {
+    protected void printPath(List<Route> path) {
         if (path.isEmpty()) {
             logger.info("No path found!");
             return;
