@@ -37,22 +37,33 @@ public class MapPanel extends JPanel {
         panel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5)); // Adjust spacing between components
 
         // Set preferred size to make control panel smaller
-        panel.setPreferredSize(new Dimension(250, 35));
+        panel.setPreferredSize(new Dimension(350, 35));  // Increased panel width
 
-        // Map type selector (combo box)
+        // Different sizes for combo and buttons
+        Dimension comboSize = new Dimension(150, 25);    // Wider combo box
+        Dimension buttonSize = new Dimension(90, 25);    // Slightly wider buttons
+
+        // Map type selector with fixed size
         JComboBox<MapHandler.MapType> mapTypeCombo = new JComboBox<>(MapHandler.MapType.values());
+        mapTypeCombo.setPreferredSize(comboSize);
+        mapTypeCombo.setMaximumSize(comboSize);
         mapTypeCombo.setFocusable(false);
+        mapTypeCombo.addActionListener(e
+                -> mapHandler.switchMapType((MapHandler.MapType) mapTypeCombo.getSelectedItem())
+        );
 
-        // Point control buttons
+        // Buttons with same size
         JButton addPointBtn = new JButton("Add Points");
-        addPointBtn.setMargin(new java.awt.Insets(5, 10, 5, 10)); // Add padding inside the button
+        addPointBtn.setPreferredSize(buttonSize);
+        addPointBtn.setMargin(new java.awt.Insets(2, 5, 2, 5));
         addPointBtn.addActionListener(e -> {
             mapHandler.getWaypointHandler().toggleAddingPoints();
-            addPointBtn.setText(addPointBtn.getText().equals("Add Points") ? "Stop Adding" : "Add Points");
+            addPointBtn.setText(addPointBtn.getText().equals("Add Points") ? "Stop" : "Add Points");
         });
 
-        JButton clearPointsBtn = new JButton("Clear Points");
-        clearPointsBtn.setMargin(new java.awt.Insets(5, 10, 5, 10)); // Add padding inside the button
+        JButton clearPointsBtn = new JButton("Clear");
+        clearPointsBtn.setPreferredSize(buttonSize);
+        clearPointsBtn.setMargin(new java.awt.Insets(2, 5, 2, 5));
         clearPointsBtn.addActionListener(e -> mapHandler.getWaypointHandler().clearWaypoints());
 
         // Add components to the panel

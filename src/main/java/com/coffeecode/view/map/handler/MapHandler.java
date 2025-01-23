@@ -1,6 +1,5 @@
 package com.coffeecode.view.map.handler;
 
-import java.io.File;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -9,12 +8,13 @@ import javax.swing.event.MouseInputListener;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.VirtualEarthTileFactoryInfo;
-import org.jxmapviewer.cache.FileBasedLocalCache;
 import org.jxmapviewer.input.PanMouseInputListener;
 import org.jxmapviewer.input.ZoomMouseWheelListenerCenter;
 import org.jxmapviewer.viewer.DefaultTileFactory;
 import org.jxmapviewer.viewer.GeoPosition;
 import org.jxmapviewer.viewer.TileFactoryInfo;
+
+import com.coffeecode.view.map.cache.MapFileCache;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -44,16 +44,13 @@ public class MapHandler {
         }
     }
 
-    private static final File CACHE_DIR = new File(System.getProperty("user.home") + File.separator + ".jxmapviewer2cache");
     private final Map<MapType, DefaultTileFactory> tileFactoryCache = new EnumMap<>(MapType.class);
     private final JXMapViewer mapViewer = initializeMapViewer();
     private final WaypointHandler waypointHandler = new WaypointHandler(mapViewer);
+    private final MapFileCache mapCache;
 
-    private void initializeCache() {
-        log.debug("Initializing cache directory at: {}", CACHE_DIR.getAbsolutePath());
-        if (!CACHE_DIR.exists()) {
-            CACHE_DIR.mkdirs();
-        }
+    public MapHandler() {
+        this.mapCache = new MapFileCache();
     }
 
     private JXMapViewer initializeMapViewer() {
@@ -76,11 +73,7 @@ public class MapHandler {
     private DefaultTileFactory createTileFactory(TileFactoryInfo info) {
         log.debug("Creating tile factory for: {}", info.getName());
         DefaultTileFactory factory = new DefaultTileFactory(info);
-
-        // Configure cache
-        FileBasedLocalCache cache = new FileBasedLocalCache(CACHE_DIR, false);
-        factory.setLocalCache(cache);
-
+        factory.setLocalCache(mapCache.getCache());
         // Optimize loading
         factory.setThreadPoolSize(8);
         return factory;
