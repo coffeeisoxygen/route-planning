@@ -6,8 +6,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.coffeecode.domain.algorithm.api.PathFinding;
-import com.coffeecode.domain.algorithm.api.PathStatistics;
 import com.coffeecode.domain.algorithm.result.PathResult;
+import com.coffeecode.domain.algorithm.result.PathStatistics;
 import com.coffeecode.domain.model.Route;
 import com.coffeecode.domain.model.RouteMap;
 

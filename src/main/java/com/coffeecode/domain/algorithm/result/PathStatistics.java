@@ -1,4 +1,4 @@
-package com.coffeecode.domain.algorithm.api;
+package com.coffeecode.domain.algorithm.result;
 
 public record PathStatistics(
         int visitedNodes,

@@ -27,17 +27,17 @@ public class BFSStrategy implements PathFinding {
         Set<UUID> visited = new HashSet<>();
 
         queue.offer(source);
-        visited.add(source);
 
         while (!queue.isEmpty()) {
             UUID current = queue.poll();
 
-            if (current.equals(target)) {
+            // Handle circular path case
+            if (current.equals(target) && (!current.equals(source) || !pathParent.isEmpty())) {
                 return reconstructPath(pathParent, source, target);
             }
 
-            for (Route route : map.getRoutes()) {
-                if (route.sourceId().equals(current) && !visited.contains(route.targetId())) {
+            for (Route route : map.getOutgoingRoutes(current)) {
+                if (!visited.contains(route.targetId())) {
                     queue.offer(route.targetId());
                     visited.add(route.targetId());
                     pathParent.put(route.targetId(), route);
