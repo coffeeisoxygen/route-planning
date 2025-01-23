@@ -53,40 +53,36 @@ public class DFSStrategy implements PathFinding {
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
         stats.startTracking();
-
         Deque<Node> stack = new ArrayDeque<>();
         Map<UUID, Route> pathParent = new HashMap<>();
         Set<UUID> visited = new HashSet<>();
 
         stack.push(new Node(source, 0));
-        visited.add(source);
 
         while (!stack.isEmpty()) {
             Node current = stack.peek();
             stats.incrementVisited();
 
-            if (current.getId().equals(target)) {
+            // Handle circular path
+            if (current.getId().equals(target)
+                    && (!current.getId().equals(source) || !pathParent.isEmpty())) {
                 stats.stopTracking();
                 return reconstructPath(pathParent, source, target);
             }
 
             List<Route> nextRoutes = map.getActiveRoutes(current.getId()).stream()
-                    .filter(r -> !visited.contains(r.targetId()))
+                    .filter(r -> !visited.contains(r.targetId()) || r.targetId().equals(target))
                     .toList();
 
-            boolean hasUnvisitedNeighbors = false;
-            for (Route route : nextRoutes) {
-                UUID nextId = route.targetId();
-                if (!visited.contains(nextId)) {
-                    stack.push(new Node(nextId, current.depth + 1));
-                    visited.add(nextId);
-                    pathParent.put(nextId, route);
-                    hasUnvisitedNeighbors = true;
-                }
-            }
-            if (!hasUnvisitedNeighbors) {
+            if (nextRoutes.isEmpty()) {
                 stack.pop();
+                continue;
             }
+
+            Route next = nextRoutes.get(0);
+            stack.push(new Node(next.targetId(), current.depth + 1));
+            visited.add(next.targetId());
+            pathParent.put(next.targetId(), next);
         }
 
         stats.stopTracking();

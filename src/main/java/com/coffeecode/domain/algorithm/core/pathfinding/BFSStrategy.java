@@ -53,26 +53,27 @@ public class BFSStrategy implements PathFinding {
     @Override
     public List<Route> findPath(RouteMap map, UUID source, UUID target) {
         stats.startTracking();
-
         Queue<Node> queue = new LinkedList<>();
         Map<UUID, Route> pathParent = new HashMap<>();
         Set<UUID> visited = new HashSet<>();
 
         queue.offer(new Node(source, 0));
-        visited.add(source);
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
             stats.incrementVisited();
 
-            if (current.getId().equals(target)) {
+            // Handle circular path
+            if (current.getId().equals(target)
+                    && (!current.getId().equals(source) || !pathParent.isEmpty())) {
                 stats.stopTracking();
                 return reconstructPath(pathParent, source, target);
             }
 
             for (Route route : map.getActiveRoutes(current.getId())) {
                 UUID nextId = route.targetId();
-                if (!visited.contains(nextId)) {
+                // Allow revisit of target for circular paths
+                if (!visited.contains(nextId) || nextId.equals(target)) {
                     queue.offer(new Node(nextId, current.depth + 1));
                     visited.add(nextId);
                     pathParent.put(nextId, route);
@@ -100,7 +101,9 @@ public class BFSStrategy implements PathFinding {
 
         while (!current.equals(source)) {
             Route route = pathParent.get(current);
-            if (route == null) break;
+            if (route == null) {
+                break;
+            }
             path.add(0, route);
             current = route.sourceId();
         }
