@@ -50,12 +50,14 @@ public class MapHandler {
     private final WaypointHandler waypointHandler = new WaypointHandler(mapViewer);
 
     private void initializeCache() {
+        log.debug("Initializing cache directory at: {}", CACHE_DIR.getAbsolutePath());
         if (!CACHE_DIR.exists()) {
             CACHE_DIR.mkdirs();
         }
     }
 
     private JXMapViewer initializeMapViewer() {
+        log.debug("Initializing map viewer");
         JXMapViewer viewer = new JXMapViewer();
 
         // Set default OSM tile factory with cache
@@ -72,6 +74,7 @@ public class MapHandler {
     }
 
     private DefaultTileFactory createTileFactory(TileFactoryInfo info) {
+        log.debug("Creating tile factory for: {}", info.getName());
         DefaultTileFactory factory = new DefaultTileFactory(info);
 
         // Configure cache
@@ -84,6 +87,7 @@ public class MapHandler {
     }
 
     private void addDefaultInteractions(JXMapViewer viewer) {
+        log.debug("Adding default interactions to map viewer");
         MouseInputListener mouseListener = new PanMouseInputListener(viewer);
         viewer.addMouseListener(mouseListener);
         viewer.addMouseMotionListener(mouseListener);
@@ -107,6 +111,7 @@ public class MapHandler {
     }
 
     private DefaultTileFactory createFactoryForType(MapType mapType) {
+        log.debug("Creating factory for map type: {}", mapType);
         TileFactoryInfo info;
         switch (mapType) {
             case SATELLITE:

@@ -51,7 +51,7 @@ public class WaypointHandler {
     }
 
     public void addWaypoint(GeoPosition pos) {
-        log.debug("Adding waypoint at: {}", pos);
+        log.debug("Adding waypoint at: lat={}, lon={}", pos.getLatitude(), pos.getLongitude());
         waypoints.add(new DefaultWaypoint(pos));
         updatePainter();
     }
