@@ -97,8 +97,20 @@ public class DFSStrategy implements PathFinding {
         List<Route> path = new ArrayList<>();
         UUID current = target;
 
+        // Changed: Handle circular paths
+        if (source.equals(target)) {
+            Route lastRoute = pathParent.get(source);
+            if (lastRoute != null) {
+                path.add(lastRoute);
+                current = lastRoute.sourceId();
+            }
+        }
+
         while (!current.equals(source)) {
             Route route = pathParent.get(current);
+            if (route == null) {
+                break;
+            }
             path.add(0, route);
             current = route.sourceId();
         }

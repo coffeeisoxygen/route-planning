@@ -88,8 +88,19 @@ public class BFSStrategy implements PathFinding {
         List<Route> path = new ArrayList<>();
         UUID current = target;
 
+        // Changed: Allow reconstruction when source equals target
+        if (source.equals(target)) {
+            // Get last route that leads back to source
+            Route lastRoute = pathParent.get(source);
+            if (lastRoute != null) {
+                path.add(lastRoute);
+                current = lastRoute.sourceId();
+            }
+        }
+
         while (!current.equals(source)) {
             Route route = pathParent.get(current);
+            if (route == null) break;
             path.add(0, route);
             current = route.sourceId();
         }
