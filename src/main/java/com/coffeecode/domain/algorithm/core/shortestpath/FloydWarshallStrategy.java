@@ -3,6 +3,7 @@ package com.coffeecode.domain.algorithm.core.shortestpath;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,35 +70,37 @@ public class FloydWarshallStrategy implements AllPairsShortestPath {
     }
 
     private void initializeMatrices(RouteMap map) {
-        // Clear existing data
         distances = new HashMap<>();
         next = new HashMap<>();
-
-        // Get unique locations
-        Set<UUID> vertices = map.getLocations().stream()
+        
+        // Get vertices from locations only
+        Set<UUID> vertices = new HashSet<>(map.getLocations().stream()
                 .map(Locations::id)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet()));
 
-        // Initialize matrices
-        vertices.forEach(id -> {
+        // Initialize matrices with vertices
+        for (UUID id : vertices) {
             distances.put(id, new HashMap<>());
             next.put(id, new HashMap<>());
+            
+            for (UUID otherId : vertices) {
+                if (id.equals(otherId)) {
+                    distances.get(id).put(otherId, 0.0);
+                    next.get(id).put(otherId, id);
+                } else {
+                    distances.get(id).put(otherId, Double.POSITIVE_INFINITY);
+                    next.get(id).put(otherId, null);
+                }
+            }
+        }
 
-            vertices.forEach(otherId -> {
-                distances.get(id).put(otherId, Double.POSITIVE_INFINITY);
-                next.get(id).put(otherId, null);
-            });
-
-            // Set self-distance
-            distances.get(id).put(id, 0.0);
-            next.get(id).put(id, id);
-        });
-
-        // Set direct routes
-        map.getRoutes().forEach(route -> {
-            distances.get(route.sourceId()).put(route.targetId(), route.distance());
-            next.get(route.sourceId()).put(route.targetId(), route.targetId());
-        });
+        // Add direct routes
+        for (Route route : map.getRoutes()) {
+            if (vertices.contains(route.sourceId()) && vertices.contains(route.targetId())) {
+                distances.get(route.sourceId()).put(route.targetId(), route.distance());
+                next.get(route.sourceId()).put(route.targetId(), route.targetId());
+            }
+        }
     }
 
     private List<Route> reconstructPath(RouteMap map, UUID source, UUID target) {

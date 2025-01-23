@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.coffeecode.domain.model.Route.RouteType;
 import com.coffeecode.domain.util.DistanceCalculator;
 
 @Service
@@ -35,11 +36,42 @@ public class RouteMap {
                 .toList();
     }
 
+    public List<Route> getOutgoingRoutes(UUID source) {
+        return routes.getOrDefault(source, Collections.emptyMap())
+                .values().stream().toList();
+    }
+
+    public List<Route> getIncomingRoutes(UUID target) {
+        return routes.entrySet().stream()
+                .flatMap(e -> e.getValue().values().stream())
+                .filter(r -> r.targetId().equals(target))
+                .toList();
+    }
+
     public List<Route> getNeighbors(UUID locationId) {
         return routes.getOrDefault(locationId, Collections.emptyMap())
                 .values()
                 .stream()
                 .toList();
+    }
+
+    public double getEdgeWeight(UUID source, UUID target) {
+        return getRoute(source, target)
+                .map(Route::distance)
+                .orElse(Double.POSITIVE_INFINITY);
+    }
+
+    public void addWeightedRoute(UUID source, UUID target, double weight, RouteType type) {
+        Route route = new Route(source, target, weight, type);
+        routes.computeIfAbsent(source, k -> new HashMap<>())
+                .put(target, route);
+    }
+
+    // Graph modification
+    public void removeRoute(UUID source, UUID target) {
+        if (routes.containsKey(source)) {
+            routes.get(source).remove(target);
+        }
     }
 
     public void addRoute(UUID sourceId, UUID targetId, Route.RouteType type) {

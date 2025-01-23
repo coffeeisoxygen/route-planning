@@ -43,7 +43,7 @@ public class RouteMapTest {
         routeMap.addLocation(end);
 
         // When
-        routeMap.addRoute(start.id(), end.id());
+        routeMap.addRoute(start.id(), end.id(), Route.RouteType.DIRECT);
 
         // Then
         assertEquals(1, routeMap.getRoutes().size());
