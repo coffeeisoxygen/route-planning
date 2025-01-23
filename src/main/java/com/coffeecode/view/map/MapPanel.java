@@ -41,14 +41,14 @@ public class MapPanel extends JPanel {
 
     private JPanel createOverlayPanel() {
         JPanel panel = new JPanel();
-        panel.setOpaque(false); // Buat transparan
+        panel.setOpaque(false);
         panel.setLayout(new BorderLayout());
 
-        // Tambahkan ComboBox untuk memilih map type
-        JComboBox<String> mapTypeCombo = new JComboBox<>(new String[]{"OpenStreetMap", "Satellite"});
+        // Use MapType enum for ComboBox
+        JComboBox<MapType> mapTypeCombo = new JComboBox<>(MapType.values());
         mapTypeCombo.addActionListener(e -> {
-            String selected = (String) mapTypeCombo.getSelectedItem();
-            switchMapType(selected.equals("Satellite") ? MapType.SATELLITE : MapType.OPENSTREETMAP);
+            MapType selected = (MapType) mapTypeCombo.getSelectedItem();
+            switchMapType(selected);
         });
 
         panel.add(mapTypeCombo, BorderLayout.CENTER);
@@ -85,6 +85,12 @@ public class MapPanel extends JPanel {
             case SATELLITE:
                 info = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.SATELLITE);
                 break;
+            case VIRTUALEARTH:
+                info = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.HYBRID);
+                break;
+            case HYBRID:
+                info = new VirtualEarthTileFactoryInfo(VirtualEarthTileFactoryInfo.HYBRID);
+                break;
             case OPENSTREETMAP:
             default:
                 info = new OSMTileFactoryInfo();
@@ -97,7 +103,4 @@ public class MapPanel extends JPanel {
         mapViewer.repaint();
     }
 
-    private enum MapType {
-        OPENSTREETMAP, SATELLITE
-    }
 }

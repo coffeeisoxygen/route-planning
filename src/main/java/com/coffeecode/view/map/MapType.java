@@ -3,7 +3,7 @@ package com.coffeecode.view.map;
 public enum MapType {
     OPENSTREETMAP("OpenStreetMap"),
     SATELLITE("Satellite"),
-    TERRAIN("Terrain"),
+    VIRTUALEARTH("Virtual Earth"),
     HYBRID("Hybrid");
 
     private final String displayName;
