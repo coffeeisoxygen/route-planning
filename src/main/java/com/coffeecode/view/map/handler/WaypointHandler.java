@@ -1,16 +1,14 @@
 package com.coffeecode.view.map.handler;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.imageio.ImageIO;
 
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.viewer.DefaultWaypoint;
@@ -25,20 +23,16 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 public class WaypointHandler {
 
-    @Getter
+    private static final int MARKER_SIZE = 100;
     private final JXMapViewer mapViewer;
-    @Getter
     private final Set<DefaultWaypoint> waypoints = new HashSet<>();
-    @Getter
-    private final WaypointPainter<DefaultWaypoint> waypointPainter = new WaypointPainter<>();
-    @Getter
+    private final WaypointPainter<DefaultWaypoint> waypointPainter;
     @Setter
     private boolean addingEnabled;
 
-    private BufferedImage waypointIcon; // Lazy-loaded icon
-
     public WaypointHandler(JXMapViewer mapViewer) {
         this.mapViewer = mapViewer;
+        this.waypointPainter = new WaypointPainter<>();
         setupMouseListener();
         setupPainter();
     }
@@ -56,48 +50,33 @@ public class WaypointHandler {
     }
 
     private void setupPainter() {
-        waypointPainter.setWaypoints(waypoints);
-        waypointPainter.setRenderer((g, map, wp) -> {
-            if (waypointIcon == null) {
-                waypointIcon = loadWaypointIcon();
-            }
+        waypointPainter.setRenderer((Graphics2D g, JXMapViewer map, DefaultWaypoint wp) -> {
+            Point2D point = map.getTileFactory().geoToPixel(wp.getPosition(), map.getZoom());
 
-            if (waypointIcon != null) {
-                Point2D point = map.getTileFactory().geoToPixel(wp.getPosition(), map.getZoom());
-                g.drawImage(waypointIcon,
-                        (int) point.getX() - waypointIcon.getWidth() / 2,
-                        (int) point.getY() - waypointIcon.getHeight(),
-                        null);
-            }
+            // Center the marker
+            int x = (int) point.getX() - MARKER_SIZE / 2;
+            int y = (int) point.getY() - MARKER_SIZE / 2;
+
+            // Draw marker with better visibility
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Outer circle (border)
+            g.setColor(Color.WHITE);
+            g.setStroke(new BasicStroke(3));
+            g.drawOval(x, y, MARKER_SIZE, MARKER_SIZE);
+
+            // Inner circle (fill)
+            g.setColor(new Color(255, 0, 0, 200)); // Semi-transparent red
+            g.fillOval(x, y, MARKER_SIZE, MARKER_SIZE);
         });
+
         mapViewer.setOverlayPainter(waypointPainter);
     }
 
-    private BufferedImage loadWaypointIcon() {
-        try {
-            // Try multiple fallback paths
-            BufferedImage icon = ImageIO.read(getClass().getResourceAsStream("/icons/waypoint-normal.png"));
-            if (icon == null) {
-                icon = ImageIO.read(getClass().getResourceAsStream("src\\main\\resources\\icons\\waypoint-highlight.png"));
-            }
-            if (icon == null) {
-                // Create a simple circle as fallback
-                icon = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g = icon.createGraphics();
-                g.setColor(Color.RED);
-                g.fillOval(0, 0, 15, 15);
-                g.dispose();
-            }
-            return icon;
-        } catch (IOException e) {
-            log.error("Error loading waypoint icon", e);
-            return null;
-        }
-    }
-
     public void addWaypoint(GeoPosition pos) {
-        log.debug("Adding waypoint at: lat={}, lon={}", pos.getLatitude(), pos.getLongitude());
-        waypoints.add(new DefaultWaypoint(pos));
+        DefaultWaypoint waypoint = new DefaultWaypoint(pos);
+        waypoints.add(waypoint);
+        log.debug("Added waypoint at: lat={}, lon={}", pos.getLatitude(), pos.getLongitude());
         updatePainter();
     }
 

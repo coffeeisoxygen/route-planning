@@ -44,7 +44,7 @@ public class MapPanel extends JPanel {
 
     private JPanel createControlPanel() {
         JPanel panel = new JPanel();
-        panel.setOpaque(false); // Make panel visible
+        panel.setOpaque(true); // Make panel visible
         panel.setBackground(new Color(255, 255, 255, 200)); // Semi-transparent white
         panel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
@@ -82,5 +82,9 @@ public class MapPanel extends JPanel {
         panel.add(clearPointsBtn);
 
         return panel;
+    }
+
+    public WaypointHandler getWaypointHandler() {
+        return waypointHandler;
     }
 }

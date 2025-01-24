@@ -7,6 +7,16 @@
   <version>1.0-SNAPSHOT</version>
   <url>https://github.com/coffeeisoxygen/route-planning</url>
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+          <include>**/*.png</include>
+          <include>**/*.properties</include>
+          <include>**/*.xml</include>
+        </includes>
+      </resource>
+    </resources>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -54,9 +64,16 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>${maven-compiler.version}</version>
+        <version>3.11.0</version>
         <configuration>
           <release>${java.version}</release>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
       <plugin>
@@ -98,6 +115,12 @@
     </repository>
   </repositories>
   <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.30</version>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -182,14 +205,16 @@
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <java.version>17</java.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <mockito.version>5.14.2</mockito.version>
-    <mockito-inline.version>5.2.0</mockito-inline.version>
     <junit.jupiter.version>5.8.1</junit.jupiter.version>
-    <spring-context.version>6.2.1</spring-context.version>
     <geotools.version>27.2</geotools.version>
     <maven-shade.version>3.2.4</maven-shade.version>
     <maven-compiler.version>3.8.0</maven-compiler.version>
+    <lombok.version>1.18.30</lombok.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <mockito-inline.version>5.2.0</mockito-inline.version>
+    <spring-context.version>6.2.1</spring-context.version>
     <logback.version>1.5.6</logback.version>
+    <slf4jjcl.version>2.0.9</slf4jjcl.version>
   </properties>
 </project>
